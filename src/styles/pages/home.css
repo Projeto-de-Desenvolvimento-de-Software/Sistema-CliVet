@@ -1,0 +1,29 @@
+main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.main_content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.main_title {
+    font-size: 45px;
+}
+
+.main_content p {
+    font-size: 20px;
+}
+
+.main_image {
+    width: 80px;
+    height: 80px;
+}

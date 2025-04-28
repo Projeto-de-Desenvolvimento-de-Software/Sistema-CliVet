@@ -4,16 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CliVet</title>
-    <link rel="stylesheet" href="./src/styles/base.css">
-    <link rel="stylesheet" href="./src/styles/components/navbar.css">
-    <link rel="stylesheet" href="./src/styles/pages/home.css">
+    <link rel="stylesheet" href="../../styles/base.css">
+    <link rel="stylesheet" href="../../styles/components/navbar.css">
+    <link rel="stylesheet" href="../../styles/components/add-sidebar.css">
+    <link rel="stylesheet" href="../../styles/pages/add-client.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
     <nav class="sidebar">
         <div class="sidebar_content">
             <div class="clinica">
-                <img src="./src/assets/images/logo.png" class="logo" alt="Logo CliVet">
+                <img src="../../assets/images/logo.png" class="logo" alt="Logo CliVet">
                 <p class="infos_clinica">
                     <span class="item-description">
                         CliVet
@@ -24,16 +25,16 @@
                 </p>
             </div>
             <ul class="side_items">
-                <li class="side_item home_page active">
-                    <a href="./index.html">
+                <li class="side_item home_page">
+                    <a href="../../../index.html">
                         <i class="fa-solid fa-house"></i>
                         <span class="item-description">
                             Início
                         </span>
                     </a>
                 </li>
-                <li class="side_item">
-                    <a href="./src/pages/client/add.html">
+                <li class="side_item active">
+                    <a href="../client/add.html">
                         <i class="fa-solid fa-address-book"></i>
                         <span class="item-description">
                             Clientes
@@ -76,12 +77,31 @@
         </div>
     </nav>
     <main>
-        <div class="main_content">
-           <h1 class="main_title">Bem vindo(a)</h1> 
-           <p>O que deseja fazer hoje?</p>
-           <img src="./src/assets/images/pata.png" alt="Pata de animal" class="main_image">
+        <div class="add_client_content">
+            <p class="add_client_title">Lista de Clientes</p>
+            <input type="text" placeholder="Pesquisar" class="search_client">
+            <button class="add_client_button" onclick="openSidebar()">
+                <i class="fa-solid fa-plus"></i>
+                Adicionar Cliente
+            </button>
         </div>
+        <div class="overlay"></div>
+          <aside class="add_client_sidebar">
+            <i id="close_sidebar_button" class="fa-solid fa-xmark" onclick="closeSidebar()"></i>  
+            <h2 class="title_sidebar">Adicionar Cliente</h2>
+            <form class="form_sidebar">
+                <p>Nome Completo*</p>
+                <input type="text" class="input_sidebar">
+                <p>Email*</p>
+                <input type="email" class="input_sidebar">
+                <p>Telefone*</p>
+                <input type="tel" class="input_sidebar">
+                <p>Endereço</p>
+                <input type="text" class="input_sidebar">
+                <button class="add_button">Salvar</button>
+            </form>
+        </aside>  
     </main>
-    <script src="./src/scripts/scripts-front/ui/script.js"></script>
+    <script src="../../scripts/scripts-front/ui/script.js"></script>
 </body>
 </html>
