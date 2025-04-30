@@ -85,3 +85,26 @@
     font-size: 16px;
     cursor: pointer;
 }
+
+
+/* Message Styles */
+#messageContainer {
+    padding: 10px 15px;
+    margin-bottom: 15px; /* Space below the message */
+    border-radius: 5px;
+    font-size: 14px;
+    display: none; /* Hidden by default */
+    text-align: center;
+}
+
+.message.success {
+    background-color: #d4edda; /* Light green */
+    color: #155724; /* Dark green */
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    background-color: #f8d7da; /* Light red */
+    color: #721c24; /* Dark red */
+    border: 1px solid #f5c6cb;
+}
