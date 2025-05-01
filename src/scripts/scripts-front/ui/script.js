@@ -13,20 +13,53 @@ document.addEventListener("DOMContentLoaded", () => {
     displayClients();
 });
 
-function openSidebar() {
-    document.querySelector('.add_client_sidebar').classList.add('open');
+function openSidebar(editIndex = null) {
+    const sidebar = document.querySelector('.add_client_sidebar');
+    const form = document.getElementById('addClientForm');
+    const title = sidebar.querySelector('.title_sidebar');
+    const saveButton = form.querySelector('.add_button');
+
+    form.reset(); // Clear form first
+    clearMessages(); // Clear any previous messages
+    form.querySelector('#editIndex').value = ''; // Clear edit index
+
+    if (editIndex !== null && clients[editIndex]) {
+        // Edit mode: Populate form and change title/button
+        const client = clients[editIndex];
+        document.getElementById('clientName').value = client.name;
+        document.getElementById('clientEmail').value = client.email;
+        document.getElementById('clientPhone').value = client.phone;
+        document.getElementById('clientAddress').value = client.address || '';
+        form.querySelector('#editIndex').value = editIndex; // Store index being edited
+        title.textContent = 'Editar Cliente';
+        saveButton.textContent = 'Atualizar';
+    } else {
+        // Add mode: Reset title/button
+        title.textContent = 'Adicionar Cliente';
+        saveButton.textContent = 'Salvar';
+    }
+
+    sidebar.classList.add('open');
     document.querySelector('.overlay').classList.add('active');
-    clearMessages(); // Clear messages when opening
 }
 
 function closeSidebar() {
-    document.querySelector('.add_client_sidebar').classList.remove('open');
-    document.querySelector('.overlay').classList.remove('active');
-    // Clear form fields when closing sidebar
+    const sidebar = document.querySelector('.add_client_sidebar');
     const form = document.getElementById('addClientForm');
+    const title = sidebar.querySelector('.title_sidebar');
+    const saveButton = form.querySelector('.add_button');
+
+    sidebar.classList.remove('open');
+    document.querySelector('.overlay').classList.remove('active');
+
+    // Reset form and edit state
     if (form) {
         form.reset();
+        form.querySelector('#editIndex').value = '';
     }
+    title.textContent = 'Adicionar Cliente';
+    saveButton.textContent = 'Salvar';
+
     // Clear any previous messages
     clearMessages();
 }
@@ -48,10 +81,9 @@ function showMessage(message, type = 'success') {
     if (!messageContainer) {
         messageContainer = document.createElement('div');
         messageContainer.id = 'messageContainer';
-        // Insert message container inside the sidebar, before the form title
         const title = sidebar.querySelector('.title_sidebar');
         if (sidebar && title) {
-            sidebar.insertBefore(messageContainer, title.nextSibling); // Insert after the title
+            sidebar.insertBefore(messageContainer, title.nextSibling);
         }
     }
 
@@ -82,6 +114,7 @@ function displayClients() {
                 <th>Email</th>
                 <th>Telefone</th>
                 <th>Endereço</th>
+                <th>Ações</th> 
             </tr>
         </thead>
         <tbody>
@@ -89,13 +122,21 @@ function displayClients() {
     `;
 
     const tbody = table.querySelector('tbody');
-    clients.forEach(client => {
+    clients.forEach((client, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${client.name}</td>
             <td>${client.email}</td>
             <td>${client.phone}</td>
             <td>${client.address || '-'}</td>
+            <td class="actions_cell">
+                <button class="edit_button" onclick="openSidebar(${index})">
+                    <i class="fa-solid fa-pencil"></i> Editar
+                </button>
+                <button class="delete_button" onclick="deleteClient(${index})">
+                    <i class="fa-solid fa-trash"></i> Excluir
+                </button>
+            </td>
         `;
         tbody.appendChild(row);
     });
@@ -104,7 +145,7 @@ function displayClients() {
 }
 
 function validateForm(name, email, phone) {
-    clearMessages(); // Clear previous messages before new validation
+    clearMessages();
 
     if (!name.trim()) {
         showMessage('O campo Nome Completo é obrigatório.', 'error');
@@ -119,57 +160,75 @@ function validateForm(name, email, phone) {
         return false;
     }
 
-    // Email Format Validation
     const emailRegex = /^\S+@\S+\.\S+$/;
     if (!emailRegex.test(email.trim())) {
         showMessage('Formato de email inválido. Use o formato nome@dominio.com.', 'error');
         return false;
     }
 
-    // Basic Phone Format Validation (allows numbers, spaces, (), -)
     const phoneRegex = /^[0-9\s()\-]+$/;
     if (!phoneRegex.test(phone.trim())) {
         showMessage('Formato de telefone inválido. Use apenas números, espaços, parênteses ou hífens.', 'error');
         return false;
     }
 
-    return true; // All validations passed
+    return true;
 }
 
-function saveClientAndDisplay() {
+function saveOrUpdateClient() {
     const nameInput = document.getElementById('clientName');
     const emailInput = document.getElementById('clientEmail');
     const phoneInput = document.getElementById('clientPhone');
     const addressInput = document.getElementById('clientAddress');
     const form = document.getElementById('addClientForm');
+    const editIndexInput = form.querySelector('#editIndex');
 
     const name = nameInput.value;
     const email = emailInput.value;
     const phone = phoneInput.value;
     const address = addressInput.value;
+    const editIndex = editIndexInput.value;
 
     if (!validateForm(name, email, phone)) {
         return; // Stop if validation fails
     }
 
-    const newClient = {
+    const clientData = {
         name: name.trim(),
         email: email.trim(),
         phone: phone.trim(),
         address: address.trim()
     };
 
-    clients.push(newClient);
+    let successMessage = '';
+
+    if (editIndex !== '' && clients[editIndex]) {
+        // Update existing client
+        clients[editIndex] = clientData;
+        successMessage = 'Cliente atualizado com sucesso!';
+    } else {
+        // Add new client
+        clients.push(clientData);
+        successMessage = 'Cliente salvo com sucesso!';
+    }
+
     displayClients(); // Update the list display
-
-    showMessage('Cliente salvo com sucesso!', 'success'); // Show success message (handled in next step)
-
-    form.reset(); // Clear the form
+    showMessage(successMessage, 'success');
+    form.reset();
+    editIndexInput.value = ''; // Clear edit index after save/update
 
     // Hide success message after a delay and then close sidebar
     setTimeout(() => {
         clearMessages();
         closeSidebar();
-    }, 2000); // Close after 2 seconds
+    }, 2000);
+}
+
+function deleteClient(index) {
+    if (confirm(`Tem certeza que deseja excluir o cliente ${clients[index].name}?`)) {
+        clients.splice(index, 1); // Remove client from array
+        displayClients(); // Refresh the list
+        showMessage('Cliente excluído com sucesso!', 'success');
+    }
 }
 

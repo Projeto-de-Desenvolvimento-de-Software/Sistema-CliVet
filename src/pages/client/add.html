@@ -95,6 +95,7 @@
             <i id="close_sidebar_button" class="fa-solid fa-xmark" onclick="closeSidebar()"></i>  
             <h2 class="title_sidebar">Adicionar Cliente</h2>
             <form class="form_sidebar" id="addClientForm">
+                <input type="hidden" id="editIndex"> <!-- Hidden field to store index for editing -->
                 <p>Nome Completo*</p>
                 <input type="text" class="input_sidebar" id="clientName" required>
                 <p>Email*</p>
@@ -103,10 +104,10 @@
                 <input type="tel" class="input_sidebar" id="clientPhone" required>
                 <p>Endereço</p>
                 <input type="text" class="input_sidebar" id="clientAddress">
-                <button type="button" class="add_button" onclick="saveClientAndDisplay()">Salvar</button>
+                <button type="button" class="add_button" onclick="saveOrUpdateClient()">Salvar</button>
             </form>
         </aside>  
     </main>
     <script src="../../scripts/scripts-front/ui/script.js"></script>
 </body>
-</html>
+</html> 
