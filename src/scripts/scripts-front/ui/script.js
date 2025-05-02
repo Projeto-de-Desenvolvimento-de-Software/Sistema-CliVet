@@ -9,6 +9,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    const telefoneInput = document.getElementById('clientPhone');
+    if (telefoneInput) {
+        telefoneInput.addEventListener('input', function (event) {
+            let valor = event.target.value;
+            valor = valor.replace(/\D/g, '');
+            valor = valor.replace(/^(\d{2})(\d)/g, '($1) $2'); 
+            valor = valor.replace(/(\d{5})(\d{4})$/, '$1-$2'); 
+            event.target.value = valor;
+        });
+    }
+
     // Initial display of clients when the page loads
     displayClients();
 });
@@ -83,7 +94,7 @@ function showMessage(message, type = 'success') {
         messageContainer.id = 'messageContainer';
         const title = sidebar.querySelector('.title_sidebar');
         if (sidebar && title) {
-            sidebar.insertBefore(messageContainer, title.nextSibling);
+            sidebar.appendChild(messageContainer, title.nextSibling);
         }
     }
 
@@ -101,7 +112,7 @@ function displayClients() {
     listContainer.innerHTML = ''; // Clear existing list
 
     if (clients.length === 0) {
-        listContainer.innerHTML = '<p class="no_clients_message">Nenhum cliente cadastrado ainda.</p>';
+        listContainer.innerHTML = '<p class="no_clients_message">Nenhum cliente cadastrado.</p>';
         return;
     }
 
@@ -168,7 +179,7 @@ function validateForm(name, email, phone) {
 
     const phoneRegex = /^[0-9\s()\-]+$/;
     if (!phoneRegex.test(phone.trim())) {
-        showMessage('Formato de telefone inválido. Use apenas números, espaços, parênteses ou hífens.', 'error');
+        showMessage('Formato de telefone inválido.', 'error');
         return false;
     }
 
@@ -221,14 +232,40 @@ function saveOrUpdateClient() {
     setTimeout(() => {
         clearMessages();
         closeSidebar();
-    }, 2000);
+    }, 500);
 }
 
+let clientToDeleteIndex = null;
+
 function deleteClient(index) {
-    if (confirm(`Tem certeza que deseja excluir o cliente ${clients[index].name}?`)) {
-        clients.splice(index, 1); // Remove client from array
-        displayClients(); // Refresh the list
-        showMessage('Cliente excluído com sucesso!', 'success');
-    }
+    clientToDeleteIndex = index;
+    const modal = document.getElementById('confirmModal');
+    const message = document.getElementById('modalMessage');
+    message.textContent = `Tem certeza que deseja excluir o cliente ${clients[index].name}?`;
+    modal.style.display = 'flex';
 }
+
+document.getElementById('confirmYes').addEventListener('click', function () {
+    if (clientToDeleteIndex !== null) {
+        clients.splice(clientToDeleteIndex, 1);
+        displayClients();
+        clientToDeleteIndex = null;
+    }
+    document.getElementById('confirmModal').style.display = 'none';
+    showSuccessModal();
+});
+
+document.getElementById('confirmNo').addEventListener('click', function () {
+    clientToDeleteIndex = null;
+    document.getElementById('confirmModal').style.display = 'none';
+});
+
+function showSuccessModal() {
+    const successModal = document.getElementById('successModal');
+    successModal.style.display = 'flex';
+    setTimeout(() => {
+        successModal.style.display = 'none';
+    }, 800); 
+}
+
 

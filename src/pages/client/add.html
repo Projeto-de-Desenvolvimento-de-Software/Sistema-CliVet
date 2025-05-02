@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../../styles/base.css">
     <link rel="stylesheet" href="../../styles/components/navbar.css">
     <link rel="stylesheet" href="../../styles/components/add-sidebar.css">
+    <link rel="stylesheet" href="../../styles/components/modals.css"> 
     <link rel="stylesheet" href="../../styles/pages/add-client.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
@@ -80,7 +81,10 @@
         <div class="add_client_content">
             <p class="add_client_title">Lista de Clientes</p>
             <div class="search_add_container">
-                <input type="text" placeholder="Pesquisar" class="search_client">
+                <div class="input_wrapper">
+                    <input type="text" placeholder="Pesquisar" class="search_client">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
                 <button class="add_client_button" onclick="openSidebar()">
                     <i class="fa-solid fa-plus"></i>
                     Adicionar Cliente
@@ -88,14 +92,14 @@
             </div>
         </div>
         <div id="client_list_container">
-            <!-- Client list will be dynamically added here -->
+            
         </div>
         <div class="overlay"></div>
           <aside class="add_client_sidebar">
             <i id="close_sidebar_button" class="fa-solid fa-xmark" onclick="closeSidebar()"></i>  
             <h2 class="title_sidebar">Adicionar Cliente</h2>
             <form class="form_sidebar" id="addClientForm">
-                <input type="hidden" id="editIndex"> <!-- Hidden field to store index for editing -->
+                <input type="hidden" id="editIndex"> 
                 <p>Nome Completo*</p>
                 <input type="text" class="input_sidebar" id="clientName" required>
                 <p>Email*</p>
@@ -107,6 +111,19 @@
                 <button type="button" class="add_button" onclick="saveOrUpdateClient()">Salvar</button>
             </form>
         </aside>  
+        <div id="confirmModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <p id="modalMessage"></p>
+                <button id="confirmYes" class="button_yes">Sim</button>
+                <button id="confirmNo" class="button_no">Não</button>
+            </div>
+        </div>
+          
+        <div id="successModal" class="modal" style="display: none;">
+            <div class="modal-content">
+              <p>Cliente excluído com sucesso!</p>
+            </div>
+        </div>
     </main>
     <script src="../../scripts/scripts-front/ui/script.js"></script>
 </body>

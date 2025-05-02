@@ -31,28 +31,40 @@ main {
     cursor: pointer;
 }
 
-.search_client {
-    border: none;
+.input_wrapper {
+    padding: 8px 15px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     background-color: #FFFFFF;
     border-radius: 10px;
-    padding-left: 15px;
     width: 338px;
     height: 40px;
-    font-size: 15px;
 }
 
+.input_wrapper input {
+    border: none;
+    font-size: 15px;
+    width: 100%;
+}
+
+.input_wrapper input:focus-visible {
+    outline: none;
+}
+
+.input_wrapper i {
+    cursor: pointer;
+    color: #808080;
+}
 
 .search_add_container {
     display: flex;
     align-items: center;
-    gap: 10px; /* Adjust gap as needed */
+    gap: 18px; 
 }
 
-
-
-/* Client List Table Styles */
 #client_list_container {
-    margin-top: 30px; /* Add some space above the table */
+    margin-top: 30px;
 }
 
 .client_table {
@@ -62,7 +74,7 @@ main {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     background-color: #FFFFFF;
     border-radius: 8px;
-    overflow: hidden; /* Ensures border-radius applies to table */
+    overflow: hidden; 
 }
 
 .client_table th, .client_table td {
@@ -72,17 +84,17 @@ main {
 }
 
 .client_table th {
-    background-color: #f2f2f2; /* Light grey header */
+    background-color: #f2f2f2; 
     font-weight: bold;
     color: #333;
 }
 
 .client_table tbody tr:nth-child(even) {
-    background-color: #f9f9f9; /* Zebra striping for rows */
+    background-color: #f9f9f9; 
 }
 
 .client_table tbody tr:hover {
-    background-color: #f1f1f1; /* Highlight row on hover */
+    background-color: #f1f1f1; 
 }
 
 .no_clients_message {
@@ -92,11 +104,8 @@ main {
     font-style: italic;
 }
 
-
-
-/* Action Buttons in Table */
 .actions_cell {
-    text-align: center; /* Center buttons in the cell */
+    text-align: center; 
 }
 
 .edit_button, .delete_button {
@@ -106,31 +115,31 @@ main {
     border-radius: 5px;
     text-align: center;
     text-decoration: none;
-    display: inline-flex; /* Use inline-flex for icon alignment */
-    align-items: center; /* Align icon and text vertically */
-    gap: 5px; /* Space between icon and text */
+    display: inline-flex; 
+    align-items: center; 
+    gap: 5px; 
     font-size: 14px;
     cursor: pointer;
-    margin: 0 4px; /* Add some space between buttons */
+    margin: 0 4px; 
     transition: background-color 0.2s ease;
 }
 
 .edit_button {
-    background-color: #ffc107; /* Yellow/Amber for Edit */
+    background-color: #85aaf3; 
 }
 
 .edit_button:hover {
-    background-color: #e0a800; /* Darker yellow on hover */
+    background-color: #5B93FF; 
 }
 
 .delete_button {
-    background-color: #dc3545; /* Red for Delete */
+    background-color: #dc3545; 
 }
 
 .delete_button:hover {
-    background-color: #c82333; /* Darker red on hover */
+    background-color: #E71D36; 
 }
 
 .edit_button i, .delete_button i {
-    font-size: 1em; /* Match icon size to text */
+    font-size: 1em; 
 }
