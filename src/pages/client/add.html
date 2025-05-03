@@ -82,7 +82,7 @@
             <p class="add_client_title">Lista de Clientes</p>
             <div class="search_add_container">
                 <div class="input_wrapper">
-                    <input type="text" placeholder="Pesquisar" class="search_client">
+                    <input type="text" placeholder="Pesquisar" id="search_input" class="search_client">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </div>
                 <button class="add_client_button" onclick="openSidebar()">
@@ -94,6 +94,7 @@
         <div id="client_list_container">
             
         </div>
+
         <div class="overlay"></div>
           <aside class="add_client_sidebar">
             <i id="close_sidebar_button" class="fa-solid fa-xmark" onclick="closeSidebar()"></i>  
@@ -111,6 +112,7 @@
                 <button type="button" class="add_button" onclick="saveOrUpdateClient()">Salvar</button>
             </form>
         </aside>  
+
         <div id="confirmModal" class="modal" style="display: none;">
             <div class="modal-content">
                 <p id="modalMessage"></p>
@@ -124,6 +126,7 @@
               <p>Cliente excluído com sucesso!</p>
             </div>
         </div>
+        
     </main>
     <script src="../../scripts/scripts-front/ui/script.js"></script>
 </body>

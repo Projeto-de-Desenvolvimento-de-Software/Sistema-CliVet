@@ -20,6 +20,18 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    const searchInput = document.getElementById('search_input');
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.toLowerCase().trim();
+            const filteredClients = clients.filter(client =>
+                client.name.toLowerCase().includes(query)
+            );
+            displayClients(filteredClients);
+        });
+    }
+
+
     // Initial display of clients when the page loads
     displayClients();
 });
@@ -105,7 +117,7 @@ function showMessage(message, type = 'success') {
 // Placeholder for client data
 let clients = [];
 
-function displayClients() {
+function displayClients(clientList = clients) {
     const listContainer = document.getElementById('client_list_container');
     if (!listContainer) return;
 
@@ -133,7 +145,7 @@ function displayClients() {
     `;
 
     const tbody = table.querySelector('tbody');
-    clients.forEach((client, index) => {
+    clientList.forEach((client, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${client.name}</td>

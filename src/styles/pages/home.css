@@ -5,6 +5,7 @@ main {
     align-items: center;
     flex-direction: column;
     padding: 20px;
+    margin-left: 218px;
 }
 
 .main_content {

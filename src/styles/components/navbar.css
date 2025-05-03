@@ -9,6 +9,7 @@ main {
     background-color: #FFFFFF;
     height: 100vh;
     box-shadow: 0px 4px 4px #808080;
+    position: fixed;
 }
 
 .sidebar_content {

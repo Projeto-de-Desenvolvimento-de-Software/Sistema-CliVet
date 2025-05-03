@@ -3,6 +3,7 @@ main {
     display: flex;
     flex-direction: column; 
     padding: 20px;
+    margin-left: 218px;
 }
 
 .add_client_content{
