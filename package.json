@@ -1,0 +1,25 @@
+{
+  "name": "sistema-clivet",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/scripts/scripts-back/services/app.js",
+    "dev": "nodemon src/scripts/scipts-back/services/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0",
+    "multer": "^1.4.5-lts.2",
+    "mysql2": "^3.14.1",
+    "sequelize": "^6.37.7",
+    "sistema-clivet": "file:"
+  },
+  "description": "",
+  "devDependencies": {
+    "dotenv": "^16.5.0",
+    "nodemon": "^3.1.10"
+  }
+}
