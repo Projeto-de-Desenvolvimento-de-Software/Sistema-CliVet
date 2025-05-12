@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/scripts/scripts-back/services/app.js",
-    "dev": "nodemon src/scripts/scipts-back/services/app.js"
+    "dev": "nodemon src/scripts/scripts-back/services/app.js"
   },
   "keywords": [],
   "author": "",
