@@ -1,4 +1,3 @@
-// Existing code...
 document.addEventListener("DOMContentLoaded", () => {
     const sideItems = document.querySelectorAll(".side_item");
 
@@ -22,12 +21,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const searchInput = document.getElementById('search_input');
     if (searchInput) {
-        searchInput.addEventListener('input', () => {
+        searchInput.addEventListener('input', async () => {
             const query = searchInput.value.toLowerCase().trim();
-            const filteredClients = clients.filter(client =>
-                client.name.toLowerCase().includes(query)
-            );
-            displayClients(filteredClients);
+            
+            try {
+                const response = await fetch(`/buscar?nome=${encodeURIComponent(query)}`);
+                
+                if (!response.ok) {
+                    displayClients([]);
+                    return;
+                }
+    
+                const cliente = await response.json();
+                displayClients(cliente); 
+            } catch (error) {
+                console.error("Erro ao buscar clientes:", error);
+            }
         });
     }
 
@@ -36,26 +45,34 @@ document.addEventListener("DOMContentLoaded", () => {
     displayClients();
 });
 
-function openSidebar(editIndex = null) {
+async function openSidebar(id = null) {
     const sidebar = document.querySelector('.add_client_sidebar');
     const form = document.getElementById('addClientForm');
     const title = sidebar.querySelector('.title_sidebar');
     const saveButton = form.querySelector('.add_button');
 
-    form.reset(); // Clear form first
-    clearMessages(); // Clear any previous messages
-    form.querySelector('#editIndex').value = ''; // Clear edit index
+    form.reset(); 
+    clearMessages(); 
+    form.querySelector('#editIndex').value = ''; 
 
-    if (editIndex !== null && clients[editIndex]) {
-        // Edit mode: Populate form and change title/button
-        const client = clients[editIndex];
-        document.getElementById('clientName').value = client.name;
-        document.getElementById('clientEmail').value = client.email;
-        document.getElementById('clientPhone').value = client.phone;
-        document.getElementById('clientAddress').value = client.address || '';
-        form.querySelector('#editIndex').value = editIndex; // Store index being edited
-        title.textContent = 'Editar Cliente';
-        saveButton.textContent = 'Atualizar';
+  if (id) {
+        try {
+            const response = await fetch(`/cliente/${id}`);
+            if (!response.ok) throw new Error('Erro ao buscar cliente');
+            const client = await response.json();
+
+            document.getElementById('clientName').value = client.nome;
+            document.getElementById('clientEmail').value = client.email;
+            document.getElementById('clientPhone').value = client.telefone;
+            document.getElementById('clientAddress').value = client.endereco || '';
+            form.querySelector('#editIndex').value = client.id;
+
+            title.textContent = 'Editar Cliente';
+            saveButton.textContent = 'Atualizar';
+        } catch (error) {
+            showMessage('Erro ao carregar dados do cliente.', 'error');
+            return;
+        }
     } else {
         // Add mode: Reset title/button
         title.textContent = 'Adicionar Cliente';
@@ -114,19 +131,35 @@ function showMessage(message, type = 'success') {
     messageContainer.style.display = 'block';
 }
 
-// Placeholder for client data
-let clients = [];
+let currentPage = 1;
+const itemsPerPage = 10;
 
-function displayClients(clientList = clients) {
-    const listContainer = document.getElementById('client_list_container');
+async function displayClients(cliente = null, page = 1) {
+  const listContainer = document.getElementById('client_list_container');
     if (!listContainer) return;
 
-    listContainer.innerHTML = ''; // Clear existing list
+    listContainer.innerHTML = '';
+    currentPage = page;
 
-    if (clients.length === 0) {
-        listContainer.innerHTML = '<p class="no_clients_message">Nenhum cliente cadastrado.</p>';
-        return;
+    if (!cliente) {
+        const response = await fetch('/cliente');
+        cliente = await response.json();
     }
+
+    if (!cliente || cliente.length === 0) {
+    const searchInput = document.getElementById('search_input');
+    const isSearching = searchInput && searchInput.value.trim().length > 0;
+    
+    listContainer.innerHTML = isSearching
+        ? '<p class="no_clients_message">Nenhum cliente encontrado.</p>'
+        : '<p class="no_clients_message">Nenhum cliente cadastrado.</p>';
+    return;
+    }
+
+    const totalPages = Math.ceil(cliente.length / itemsPerPage);
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const clientesPaginados = cliente.slice(startIndex, endIndex);
 
     const table = document.createElement('table');
     table.classList.add('client_table');
@@ -137,26 +170,25 @@ function displayClients(clientList = clients) {
                 <th>Email</th>
                 <th>Telefone</th>
                 <th>Endereço</th>
-                <th>Ações</th> 
+                <th>Ações</th>
             </tr>
         </thead>
-        <tbody>
-        </tbody>
+        <tbody></tbody>
     `;
 
     const tbody = table.querySelector('tbody');
-    clientList.forEach((client, index) => {
+    clientesPaginados.forEach((client) => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${client.name}</td>
+            <td>${client.nome}</td>
             <td>${client.email}</td>
-            <td>${client.phone}</td>
-            <td>${client.address || '-'}</td>
+            <td>${client.telefone}</td>
+            <td>${client.endereco || '-'}</td>
             <td class="actions_cell">
-                <button class="edit_button" onclick="openSidebar(${index})">
+                <button class="edit_button" onclick="openSidebar('${client.id}')">
                     <i class="fa-solid fa-pencil"></i> Editar
                 </button>
-                <button class="delete_button" onclick="deleteClient(${index})">
+                <button class="delete_button" onclick="deleteClient('${client.id}')">
                     <i class="fa-solid fa-trash"></i> Excluir
                 </button>
             </td>
@@ -165,6 +197,29 @@ function displayClients(clientList = clients) {
     });
 
     listContainer.appendChild(table);
+
+    renderPagination(cliente, totalPages);
+}
+
+function renderPagination(cliente, totalPages) {
+    const listContainer = document.getElementById('client_list_container');
+    const paginationContainer = document.createElement('div');
+    paginationContainer.className = 'pagination';
+
+    for (let i = 1; i <= totalPages; i++) {
+        const button = document.createElement('button');
+        button.className = 'pagination_button';
+        button.textContent = i;
+        if (i === currentPage) button.classList.add('active');
+
+        button.addEventListener('click', () => {
+            displayClients(cliente, i);
+        });
+
+        paginationContainer.appendChild(button);
+    }
+
+    listContainer.appendChild(paginationContainer);
 }
 
 function validateForm(name, email, phone) {
@@ -195,10 +250,17 @@ function validateForm(name, email, phone) {
         return false;
     }
 
+    const digitCount = phone.replace(/\D/g, '').length;
+    if (digitCount > 11 || digitCount < 10) {
+        showMessage('Formato de telefone inválido.', 'error');
+        return false;
+    }
+
+
     return true;
 }
 
-function saveOrUpdateClient() {
+ async function saveOrUpdateClient() {
     const nameInput = document.getElementById('clientName');
     const emailInput = document.getElementById('clientEmail');
     const phoneInput = document.getElementById('clientPhone');
@@ -210,65 +272,103 @@ function saveOrUpdateClient() {
     const email = emailInput.value;
     const phone = phoneInput.value;
     const address = addressInput.value;
-    const editIndex = editIndexInput.value;
+    const clientId = editIndexInput.value;
 
     if (!validateForm(name, email, phone)) {
-        return; // Stop if validation fails
+        return; 
     }
 
     const clientData = {
-        name: name.trim(),
+        nome: name.trim(),
         email: email.trim(),
-        phone: phone.trim(),
-        address: address.trim()
+        telefone: phone.trim(),
+        endereco: address.trim()
     };
 
-    let successMessage = '';
+   try {
+        let response;
+        if (clientId) {
+            response = await fetch(`/cliente/editar/${clientId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(clientData)
+            });
+        } else {
+            response = await fetch('/cliente', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(clientData)
+            });
+        }
 
-    if (editIndex !== '' && clients[editIndex]) {
-        // Update existing client
-        clients[editIndex] = clientData;
-        successMessage = 'Cliente atualizado com sucesso!';
-    } else {
-        // Add new client
-        clients.push(clientData);
-        successMessage = 'Cliente salvo com sucesso!';
+        const data = await response.json(); 
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Erro ao salvar cliente');
+        }
+
+        if (data.message !== "Nenhuma alteração foi feita.") {
+            const successMessage = clientId
+                ? 'Cliente atualizado com sucesso!'
+                : 'Cliente salvo com sucesso!';
+            showMessage(successMessage, 'success');
+        }
+
+        form.reset();
+        editIndexInput.value = '';
+
+        await displayClients();
+
+        setTimeout(() => {
+            clearMessages();
+            closeSidebar();
+        }, 500);
+    } catch (error) {
+        showMessage(error.message, 'error');
     }
-
-    displayClients(); // Update the list display
-    showMessage(successMessage, 'success');
-    form.reset();
-    editIndexInput.value = ''; // Clear edit index after save/update
-
-    // Hide success message after a delay and then close sidebar
-    setTimeout(() => {
-        clearMessages();
-        closeSidebar();
-    }, 500);
 }
 
-let clientToDeleteIndex = null;
+let clientToDeleteId = null;
 
-function deleteClient(index) {
-    clientToDeleteIndex = index;
+function deleteClient(id) {
+     clientToDeleteId = id;
     const modal = document.getElementById('confirmModal');
     const message = document.getElementById('modalMessage');
-    message.textContent = `Tem certeza que deseja excluir o cliente ${clients[index].name}?`;
-    modal.style.display = 'flex';
+   
+      fetch(`/cliente/${id}`)
+        .then(res => res.json())
+        .then(client => {
+            message.textContent = `Tem certeza que deseja excluir o cliente ${client.nome}?`;
+            modal.style.display = 'flex';
+        })
+        .catch(() => {
+            message.textContent = 'Erro ao buscar cliente.';
+            modal.style.display = 'flex';
+        });
 }
 
-document.getElementById('confirmYes').addEventListener('click', function () {
-    if (clientToDeleteIndex !== null) {
-        clients.splice(clientToDeleteIndex, 1);
-        displayClients();
-        clientToDeleteIndex = null;
+document.getElementById('confirmYes').addEventListener('click', async function () {
+    if (clientToDeleteId !== null) {
+        try {
+            const response = await fetch(`/cliente/${clientToDeleteId}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Erro ao excluir cliente');
+            }
+            await displayClients();
+            showSuccessModal();
+        } catch (error) {
+            showMessage(error.message, 'error');
+        }
+        clientToDeleteId = null;
     }
     document.getElementById('confirmModal').style.display = 'none';
-    showSuccessModal();
 });
-
+ 
 document.getElementById('confirmNo').addEventListener('click', function () {
-    clientToDeleteIndex = null;
+    clientToDeleteId = null;
     document.getElementById('confirmModal').style.display = 'none';
 });
 

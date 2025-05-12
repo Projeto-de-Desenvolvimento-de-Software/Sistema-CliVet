@@ -144,3 +144,22 @@ main {
 .edit_button i, .delete_button i {
     font-size: 1em; 
 }
+
+.pagination {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.pagination_button {
+    margin: 0 5px;
+    padding: 6px 12px;
+    border: none;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.pagination_button.active {
+    background-color: #1B5C59; 
+    color: white;
+    font-weight: bold;
+}
