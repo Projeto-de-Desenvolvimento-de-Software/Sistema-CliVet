@@ -1,3 +1,5 @@
+import { pool } from "../services/db.js";
+
 export const createClient = async (req, res) => {
     const { nome, email, telefone, endereco} = req.body;
     const newClient = { nome, email, telefone, endereco };
