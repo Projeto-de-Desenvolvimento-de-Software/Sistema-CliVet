@@ -40,8 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-
-    // Initial display of clients when the page loads
     displayClients();
 });
 
@@ -74,7 +72,6 @@ async function openSidebar(id = null) {
             return;
         }
     } else {
-        // Add mode: Reset title/button
         title.textContent = 'Adicionar Cliente';
         saveButton.textContent = 'Salvar';
     }
@@ -92,7 +89,6 @@ function closeSidebar() {
     sidebar.classList.remove('open');
     document.querySelector('.overlay').classList.remove('active');
 
-    // Reset form and edit state
     if (form) {
         form.reset();
         form.querySelector('#editIndex').value = '';
@@ -100,11 +96,9 @@ function closeSidebar() {
     title.textContent = 'Adicionar Cliente';
     saveButton.textContent = 'Salvar';
 
-    // Clear any previous messages
     clearMessages();
 }
 
-// Function to clear messages
 function clearMessages() {
     let messageContainer = document.getElementById('messageContainer');
     if (messageContainer) {
@@ -113,7 +107,6 @@ function clearMessages() {
     }
 }
 
-// Function to display messages (validation and success)
 function showMessage(message, type = 'success') {
     let messageContainer = document.getElementById('messageContainer');
     const sidebar = document.querySelector('.add_client_sidebar');
@@ -255,7 +248,6 @@ function validateForm(name, email, phone) {
         showMessage('Formato de telefone inválido.', 'error');
         return false;
     }
-
 
     return true;
 }
