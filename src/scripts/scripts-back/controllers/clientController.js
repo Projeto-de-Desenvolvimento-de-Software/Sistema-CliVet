@@ -62,7 +62,7 @@ export const updateClient = async (req, res) => {
         currentClient[0].telefone === telefone &&
         currentClient[0].endereco === endereco
     ) {
-        return res.status(200).json({ messsage: "Nenhuma alteração foi feita." });
+        return res.status(200).json({ message: "Nenhuma alteração foi feita." });
     }
 
     const [rows] = await pool.query("SELECT * FROM Cliente WHERE email = ? AND id != ?", [email, id]);
