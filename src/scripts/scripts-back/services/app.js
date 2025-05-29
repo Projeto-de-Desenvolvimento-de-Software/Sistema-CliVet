@@ -3,6 +3,7 @@ import path    from "path";
 import { fileURLToPath } from "url";
 
 import { createClient, renderClients, getClientById, searchClients, updateClient, deleteClient } from "../controllers/clientController.js"
+import { createProduct } from "../controllers/productController.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
@@ -21,6 +22,8 @@ app.get("/cliente/:id", getClientById);
 app.get("/buscar",  searchClients);
 app.put("/cliente/editar/:id", updateClient);
 app.delete("/cliente/:id", deleteClient);
+
+app.post('/produto', createProduct);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
