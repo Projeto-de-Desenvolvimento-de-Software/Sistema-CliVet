@@ -8,7 +8,7 @@ export function clearMessages() {
 
 export function showMessage(message, type = 'success') {
     let messageContainer = document.getElementById('messageContainer');
-    const sidebar = document.querySelector('.add_client_sidebar');
+    const sidebar = document.querySelector('.add_sidebar');
 
     if (!messageContainer) {
         messageContainer = document.createElement('div');

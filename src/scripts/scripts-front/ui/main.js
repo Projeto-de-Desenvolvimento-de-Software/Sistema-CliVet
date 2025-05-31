@@ -20,6 +20,24 @@ document.addEventListener("DOMContentLoaded", () => {
             event.target.value = valor;
         });
     }
+        
+    const precoInput = document.getElementById('productPrice');
+    if (precoInput) {
+        precoInput.addEventListener('input', function (event) {
+            let valor = event.target.value.replace(/\D/g, '');
+
+            if (valor.length === 0) {
+                event.target.value = 'R$ 0,00';
+                return;
+            }
+
+            valor = (parseInt(valor) / 100).toFixed(2);
+            valor = valor
+                .replace(".", ",")
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            event.target.value = 'R$ ' + valor;
+        });
+    }
 
     const searchInput = document.getElementById('search_input');
     if (searchInput) {
@@ -40,4 +58,3 @@ document.addEventListener("DOMContentLoaded", () => {
     displayClients();
     confirmDeleteListeners();
 });
-

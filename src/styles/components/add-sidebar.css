@@ -1,4 +1,4 @@
-.add_client_sidebar {
+.add_sidebar {
     height: 100%;
     background-color: #FFFFFF;
     position: fixed;
@@ -11,7 +11,7 @@
     z-index: 1001;
 }
 
-.add_client_sidebar.open {
+.add_sidebar.open {
     right: 0;
 }
 
