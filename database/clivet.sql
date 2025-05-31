@@ -29,11 +29,17 @@ ON DELETE SET NULL;
 
 -- Tabela Produto: representa os produtos disponíveis
 CREATE TABLE Produto (
-    idProduto INT PRIMARY KEY,
-    nomeProduto VARCHAR(100),
-    descricaoProduto VARCHAR(100),
-    categoriaProduto VARCHAR(50),
-    precoProduto DECIMAL(10, 2)
+    idProduto INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nomeProduto VARCHAR(100) NOT NULL,
+    descricaoProduto VARCHAR(255),
+    categoriaProduto ENUM(
+        'Ração',
+        'Petisco',
+        'Acessório',
+        'Item',
+        'Higiene'
+    ) NOT NULL,
+    precoProduto DECIMAL(10, 2) NOT NULL
 );
 
 -- Tabela ItensVenda: relaciona os produtos vendidos em uma venda

@@ -3,8 +3,8 @@ import { displayClients } from './pagination.js';
 import { validateForm } from './validation.js';
 
 export async function openSidebar(id = null) {
-    const sidebar = document.querySelector('.add_client_sidebar');
-    const form = document.getElementById('addClientForm');
+    const sidebar = document.querySelector('.add_sidebar');
+    const form = document.getElementById('addForm');
     const title = sidebar.querySelector('.title_sidebar');
     const saveButton = form.querySelector('.add_button');
 
@@ -31,7 +31,7 @@ export async function openSidebar(id = null) {
             return;
         }
     } else {
-        title.textContent = 'Adicionar Cliente';
+        //title.textContent = 'Adicionar Cliente';
         saveButton.textContent = 'Salvar';
     }
 
@@ -40,8 +40,8 @@ export async function openSidebar(id = null) {
 }
 
 export function closeSidebar() {
-    const sidebar = document.querySelector('.add_client_sidebar');
-    const form = document.getElementById('addClientForm');
+    const sidebar = document.querySelector('.add_sidebar');
+    const form = document.getElementById('addForm');
     const title = sidebar.querySelector('.title_sidebar');
     const saveButton = form.querySelector('.add_button');
 
@@ -53,7 +53,7 @@ export function closeSidebar() {
         form.querySelector('#editIndex').value = '';
     }
 
-    title.textContent = 'Adicionar Cliente';
+    //title.textContent = 'Adicionar Cliente';
     saveButton.textContent = 'Salvar';
     clearMessages();
 }
@@ -63,7 +63,7 @@ export async function saveOrUpdateClient() {
     const emailInput = document.getElementById('clientEmail');
     const phoneInput = document.getElementById('clientPhone');
     const addressInput = document.getElementById('clientAddress');
-    const form = document.getElementById('addClientForm');
+    const form = document.getElementById('addForm');
     const editIndexInput = form.querySelector('#editIndex');
 
     const name = nameInput.value;
