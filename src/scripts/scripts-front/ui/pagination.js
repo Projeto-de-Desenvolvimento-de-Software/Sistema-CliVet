@@ -31,7 +31,7 @@ export async function displayClients(cliente = null, page = 1) {
     const clientesPaginados = cliente.slice(startIndex, endIndex);
 
     const table = document.createElement('table');
-    table.classList.add('client_table');
+    table.classList.add('pages_table');
     table.innerHTML = `
         <thead>
             <tr>

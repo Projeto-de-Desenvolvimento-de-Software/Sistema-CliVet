@@ -18,7 +18,7 @@ main {
     font-weight: bold;
 }
 
-.add_button {
+.add_button, .add_product_button {
     background-color: #1B5C59; 
     border: none;
     color: #FFFFFF;
@@ -68,7 +68,7 @@ main {
     margin-top: 30px;
 }
 
-.client_table {
+.pages_table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 15px;
@@ -78,23 +78,23 @@ main {
     overflow: hidden; 
 }
 
-.client_table th, .client_table td {
+.pages_table th, .pages_table td {
     border: 1px solid #ddd;
     padding: 12px 15px;
     text-align: left;
 }
 
-.client_table th {
+.pages_table th {
     background-color: #f2f2f2; 
     font-weight: bold;
     color: #333;
 }
 
-.client_table tbody tr:nth-child(even) {
+.pages_table tbody tr:nth-child(even) {
     background-color: #f9f9f9; 
 }
 
-.client_table tbody tr:hover {
+.pages_table tbody tr:hover {
     background-color: #f1f1f1; 
 }
 
