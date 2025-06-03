@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
         
-    const precoInput = document.getElementById('productPrice');
+   const precoInput = document.getElementById('productPrice');
     if (precoInput) {
         precoInput.addEventListener('input', function (event) {
             let valor = event.target.value.replace(/\D/g, '');
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            valor = (parseInt(valor) / 100).toFixed(2);
+            valor = (parseFloat(valor) / 100).toFixed(2);
             valor = valor
                 .replace(".", ",")
                 .replace(/\B(?=(\d{3})+(?!\d))/g, ".");

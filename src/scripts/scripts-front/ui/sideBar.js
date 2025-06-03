@@ -122,6 +122,49 @@ export async function saveOrUpdateClient() {
     }
 }
 
+export async function saveOrUpdateProduct() {
+    const productNameInput = document.getElementById('productName');
+    const productDescriptionInput = document.getElementById('productDescription');
+    const productCategoryInput = document.getElementById('productCategory');
+    const productPriceInput = document.getElementById('productPrice');
+    const form = document.getElementById('addForm');
+
+    const productName = productNameInput.value;
+    const productDescription = productDescriptionInput.value;
+    const productCategory = productCategoryInput.textContent;
+    const productPrice = productPriceInput.value;
+
+      const numericPrice = parseFloat(
+        productPrice
+            .replace(/[R$\s.]/g, '') 
+            .replace(',', '.')     
+      )
+
+    const productData = {
+        nomeProduto: productName.trim(),
+        descricaoProduto: productDescription.trim(),
+        categoriaProduto: productCategory.trim(),
+         precoProduto: numericPrice
+    };
+
+   try {
+        const response = await fetch('/produto', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(productData)
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Erro ao salvar Produto');
+
+        showMessage("Produto salvo com sucesso!", 'success');
+        form.reset();
+    } catch (error) {
+        showMessage(error.message, 'error');
+    }
+}
+
+window.saveOrUpdateProduct = saveOrUpdateProduct; 
 window.openSidebar = openSidebar;
 window.closeSidebar = closeSidebar;
 window.saveOrUpdateClient = saveOrUpdateClient;
