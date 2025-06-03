@@ -1,6 +1,6 @@
 import { clearMessages, showMessage } from './messages.js';
 import { displayClients } from './pagination.js';
-import { validateForm } from './validation.js';
+import { validateFormClient, validateFormProduct } from './validation.js';
 
 export async function openSidebar(id = null) {
     const sidebar = document.querySelector('.add_sidebar');
@@ -72,7 +72,7 @@ export async function saveOrUpdateClient() {
     const address = addressInput.value;
     const clientId = editIndexInput.value;
 
-    if (!validateForm(name, email, phone)) return;
+    if (!validateFormClient(name, email, phone)) return;
 
     const clientData = {
         nome: name.trim(),
@@ -147,6 +147,8 @@ export async function saveOrUpdateProduct() {
          precoProduto: numericPrice
     };
 
+    if (!validateFormProduct(productName, productCategory, productPrice)) return;
+
    try {
         const response = await fetch('/produto', {
             method: 'POST',
@@ -159,6 +161,11 @@ export async function saveOrUpdateProduct() {
 
         showMessage("Produto salvo com sucesso!", 'success');
         form.reset();
+
+        setTimeout(() => {
+            clearMessages();
+            closeSidebar();
+        }, 500);
     } catch (error) {
         showMessage(error.message, 'error');
     }

@@ -1,6 +1,6 @@
 import { showMessage, clearMessages } from './messages.js';
 
-export function validateForm(name, email, phone) {
+export function validateFormClient(name, email, phone) {
     clearMessages();
 
     if (!name.trim()) {
@@ -34,5 +34,24 @@ export function validateForm(name, email, phone) {
         return false;
     }
 
+    return true;
+}
+
+export function validateFormProduct(productName, productCategory, productPrice) {
+    clearMessages();
+    if (!productName.trim()) {
+        showMessage('O campo Nome do Produto é obrigatório.', 'error');
+        return false;
+    }
+
+    if (productCategory == 'Selecione uma categoria') {
+        showMessage('O campo Categoria é obrigatório.', 'error');
+        return false;
+    }
+
+    if (!productPrice.trim()) {
+        showMessage('O campo Preço é obrigatório.', 'error');
+        return false;
+    }
     return true;
 }
