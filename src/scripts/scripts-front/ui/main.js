@@ -1,5 +1,5 @@
-import { displayClients } from './pagination.js';
-import { deleteClient, confirmDeleteListeners } from './modal.js';
+import { displayClients, displayProducts } from './pagination.js';
+import { deleteClient, deleteProduct, confirmDeleteListeners } from './modal.js';
 
 document.addEventListener("DOMContentLoaded", () => {
     const sideItems = document.querySelectorAll(".side_item");
@@ -39,22 +39,29 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    const searchInput = document.getElementById('search_input');
-    if (searchInput) {
-        searchInput.addEventListener('input', async () => {
-            const query = searchInput.value.toLowerCase().trim();
+   function setupSearch(inputId, endpoint, displayCallback, paramName) {
+    const inputElement = document.getElementById(inputId);
+    if (inputElement) {
+        inputElement.addEventListener('input', async () => {
+            const query = inputElement.value.toLowerCase().trim();
 
             try {
-                const response = await fetch(`/buscar?nome=${encodeURIComponent(query)}`);
-                if (!response.ok) return displayClients([]);
-                const cliente = await response.json();
-                displayClients(cliente);
+                const response = await fetch(`/${endpoint}?${paramName}=${encodeURIComponent(query)}`);
+                if (!response.ok) return displayCallback([]);
+                const results = await response.json();
+                displayCallback(results);
             } catch (error) {
-                console.error("Erro ao buscar clientes:", error);
+                console.error(`Erro ao buscar em /${endpoint}:`, error);
             }
         });
     }
+    }
+
+    setupSearch('search_input', 'buscar', displayClients, 'nome');
+    setupSearch('search_product_input', 'buscarProduto', displayProducts, 'nomeProduto');
 
     displayClients();
+    displayProducts();
     confirmDeleteListeners();
 });
+

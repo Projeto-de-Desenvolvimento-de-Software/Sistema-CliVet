@@ -1,8 +1,8 @@
 import { clearMessages, showMessage } from './messages.js';
-import { displayClients } from './pagination.js';
+import { displayClients, displayProducts } from './pagination.js';
 import { validateFormClient, validateFormProduct } from './validation.js';
 
-export async function openSidebar(id = null) {
+export async function openSidebar(mode = null, id = null, idProduto = null) {
     const sidebar = document.querySelector('.add_sidebar');
     const form = document.getElementById('addForm');
     const title = sidebar.querySelector('.title_sidebar');
@@ -30,8 +30,31 @@ export async function openSidebar(id = null) {
             showMessage('Erro ao carregar dados do cliente.', 'error');
             return;
         }
+    } else if (idProduto) {
+        try {
+           const response = await fetch(`/produto/${idProduto}`);
+            if (!response.ok) throw new Error('Erro ao buscar Produto');
+            const product = await response.json();
+
+            document.getElementById('productName').value = product.nomeProduto;
+            document.getElementById('productDescription').value = product.descricaoProduto || '';
+            document.getElementById('productCategory').textContent =  product.categoriaProduto;
+            document.getElementById('productPrice').value = product.precoProduto?.toString().replace('.', ',') || '';
+            form.querySelector('#editIndex').value = product.idProduto;
+
+            title.textContent = 'Editar Produto';
+            saveButton.textContent = 'Atualizar';
+        } catch (error) {
+            showMessage('Erro ao carregar dados do cliente.', 'error');
+            return;
+        }
     } else {
         //title.textContent = 'Adicionar Cliente';
+        if (mode === 'addProduct') {
+            title.textContent = 'Adicionar Produto';
+        } else {
+            title.textContent = 'Adicionar Cliente';
+        }
         saveButton.textContent = 'Salvar';
     }
 
@@ -128,11 +151,13 @@ export async function saveOrUpdateProduct() {
     const productCategoryInput = document.getElementById('productCategory');
     const productPriceInput = document.getElementById('productPrice');
     const form = document.getElementById('addForm');
-
+    const editIndexInput = form.querySelector('#editIndex');
+    
     const productName = productNameInput.value;
     const productDescription = productDescriptionInput.value;
     const productCategory = productCategoryInput.textContent;
     const productPrice = productPriceInput.value;
+    const productId = editIndexInput.value;
 
       const numericPrice = parseFloat(
         productPrice
@@ -144,23 +169,41 @@ export async function saveOrUpdateProduct() {
         nomeProduto: productName.trim(),
         descricaoProduto: productDescription.trim(),
         categoriaProduto: productCategory.trim(),
-         precoProduto: numericPrice
+        precoProduto: numericPrice
     };
 
     if (!validateFormProduct(productName, productCategory, productPrice)) return;
 
    try {
-        const response = await fetch('/produto', {
+
+    let response;
+
+        if (productId) {
+            response = await fetch(`/produto/editar/${productId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(productData)
+            });
+        } else {
+            response = await fetch('/produto', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(productData)
         });
+        }
 
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Erro ao salvar Produto');
 
-        showMessage("Produto salvo com sucesso!", 'success');
+         const successMessage = productId
+            ? 'Produto atualizado com sucesso!'
+            : 'Produto salvo com sucesso!';
+        showMessage(successMessage, 'success');
+        
         form.reset();
+        editIndexInput.value = '';
+
+        await displayProducts();
 
         setTimeout(() => {
             clearMessages();

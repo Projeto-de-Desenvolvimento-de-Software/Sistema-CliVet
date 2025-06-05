@@ -86,13 +86,13 @@
                     <input type="text" placeholder="Pesquisar" id="search_product_input" class="search">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </div>
-                <button class="add_button" onclick="openSidebar()">
+                <button class="add_button" onclick="openSidebar('addProduct')">
                     <i class="fa-solid fa-plus"></i>
                     Adicionar Produto
                 </button>
             </div>
         </div>
-        <div id="list_container"></div>
+        <div id="product_list_container"></div>
          <div id="pagination_container" class="pagination_container"></div>
 
         <div class="overlay"></div>
@@ -136,7 +136,7 @@
           
         <div id="successModal" class="modal" style="display: none;">
             <div class="modal-content">
-              <p>Cliente excluído com sucesso!</p>
+              <p>Produto excluído com sucesso!</p>
             </div>
         </div>
         
