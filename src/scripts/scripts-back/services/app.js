@@ -3,7 +3,7 @@ import path    from "path";
 import { fileURLToPath } from "url";
 
 import { createClient, renderClients, getClientById, searchClients, updateClient, deleteClient } from "../controllers/clientController.js"
-import { createProduct } from "../controllers/productController.js";
+import { createProduct, getProductById, renderProducts, searchProducts, updateProduct, deleteProduct } from "../controllers/productController.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
@@ -23,7 +23,12 @@ app.get("/buscar",  searchClients);
 app.put("/cliente/editar/:id", updateClient);
 app.delete("/cliente/:id", deleteClient);
 
+app.get('/produto', renderProducts);
 app.post('/produto', createProduct);
+app.get('/produto/:idProduto', getProductById);
+app.get("/buscarProduto",  searchProducts);
+app.put("/produto/editar/:idProduto", updateProduct);
+app.delete("/produto/:idProduto", deleteProduct);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
