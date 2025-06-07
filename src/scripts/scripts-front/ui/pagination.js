@@ -1,7 +1,29 @@
 import { openSidebar } from './sideBar.js';
 
 export let currentPage = 1;
+let currentProductPage = 1;
 const itemsPerPage = 10;
+const productItemsPerPage = 10;
+
+function renderPagination(dataList, totalPages, currentPage, updateFunction) {
+    const paginationContainer = document.createElement('div');
+    paginationContainer.className = 'pagination';
+
+    for (let i = 1; i <= totalPages; i++) {
+        const button = document.createElement('button');
+        button.className = 'pagination_button';
+        button.textContent = i;
+        if (i === currentPage) button.classList.add('active');
+
+        button.addEventListener('click', () => {
+            updateFunction(dataList, i);
+        });
+
+        paginationContainer.appendChild(button);
+    }
+
+    return paginationContainer;
+}
 
 export async function displayClients(cliente = null, page = 1) {
     const listContainer = document.getElementById('client_list_container');
@@ -66,39 +88,19 @@ export async function displayClients(cliente = null, page = 1) {
     });
 
     listContainer.appendChild(table);
-    renderPagination(cliente, totalPages);
+    listContainer.appendChild(renderPagination(cliente, totalPages, currentPage, displayClients));
 }
 
-function renderPagination(cliente, totalPages) {
-    const listContainer = document.getElementById('client_list_container');
-    const paginationContainer = document.createElement('div');
-    paginationContainer.className = 'pagination';
-
-    for (let i = 1; i <= totalPages; i++) {
-        const button = document.createElement('button');
-        button.className = 'pagination_button';
-        button.textContent = i;
-        if (i === currentPage) button.classList.add('active');
-
-        button.addEventListener('click', () => {
-            displayClients(cliente, i);
-        });
-
-        paginationContainer.appendChild(button);
-    }
-
-    listContainer.appendChild(paginationContainer);
-}
-
-export async function displayProducts(produto = null) {
-        const listContainer = document.getElementById('product_list_container');
-        if (!listContainer) return;
+export async function displayProducts(produto = null, page = 1) {
+    const listContainer = document.getElementById('product_list_container');
+    if (!listContainer) return;
 
     listContainer.innerHTML = '';
+    currentProductPage = page;
 
     if (!produto) {
         try {
-            const response = await fetch('/produto'); 
+            const response = await fetch('/produto');
             produto = await response.json();
         } catch (error) {
             console.error('Erro ao buscar produtos:', error);
@@ -108,17 +110,22 @@ export async function displayProducts(produto = null) {
     }
 
     if (!produto || produto.length === 0) {
-      const searchInputProduct = document.getElementById('search_product_input');
+        const searchInputProduct = document.getElementById('search_product_input');
         const isSearching = searchInputProduct && searchInputProduct.value.trim().length > 0;
 
         listContainer.innerHTML = isSearching
-            ? '<p class="no_products_message">Nenhum Produto encontrado.</p>'
-            : '<p class="no_products_message">Nenhum Produto cadastrado.</p>';
+            ? '<p class="no_products_message">Nenhum produto encontrado.</p>'
+            : '<p class="no_products_message">Nenhum produto cadastrado.</p>';
         return;
     }
 
+    const totalPages = Math.ceil(produto.length / productItemsPerPage);
+    const startIndex = (page - 1) * productItemsPerPage;
+    const endIndex = startIndex + productItemsPerPage;
+    const produtosPaginados = produto.slice(startIndex, endIndex);
+
     const table = document.createElement('table');
-    table.classList.add('products_table');
+    table.classList.add('pages_table');
     table.innerHTML = `
         <thead>
             <tr>
@@ -134,7 +141,7 @@ export async function displayProducts(produto = null) {
 
     const tbody = table.querySelector('tbody');
 
-    produto.forEach((product) => {
+    produtosPaginados.forEach((product) => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${product.nomeProduto}</td>
@@ -154,5 +161,5 @@ export async function displayProducts(produto = null) {
     });
 
     listContainer.appendChild(table);
-
+    listContainer.appendChild(renderPagination(produto, totalPages, currentProductPage, displayProducts));
 }
