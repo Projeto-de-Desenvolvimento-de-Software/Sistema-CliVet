@@ -74,6 +74,7 @@ export function closeSidebar() {
     if (form) {
         form.reset();
         form.querySelector('#editIndex').value = '';
+        document.getElementById('productCategory').textContent = 'Selecione uma categoria';
     }
 
     //title.textContent = 'Adicionar Cliente';
