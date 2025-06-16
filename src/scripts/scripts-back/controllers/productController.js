@@ -33,6 +33,26 @@ export const getProductById = async (req, res) => {
     }
 };
 
+export const getProductsByCategory = async (req, res) => {
+  const { categoriaProduto } = req.query;
+
+  try {
+    const [rows] = await pool.query(
+      "SELECT idProduto, nomeProduto FROM Produto WHERE categoriaProduto = ?",
+      [categoriaProduto]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Nenhum produto encontrado para esta categoria." });
+    }
+
+    res.json(rows);
+  } catch (error) {
+    console.error("Erro ao buscar produtos por categoria:", error);
+    res.status(500).json({ error: "Erro interno do servidor." });
+  }
+};
+
 export const renderProducts = async (req, res) => {
     const [rows] = await pool.query("SELECT * FROM Produto");
     res.json(rows)
