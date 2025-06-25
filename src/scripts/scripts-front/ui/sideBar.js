@@ -49,11 +49,12 @@ export async function openSidebar(mode = null, id = null, idProduto = null) {
             return;
         }
     } else {
-        //title.textContent = 'Adicionar Cliente';
         if (mode === 'addProduct') {
             title.textContent = 'Adicionar Produto';
-        } else {
+        } else if (mode === 'addClient'){
             title.textContent = 'Adicionar Cliente';
+        } else {
+            title.textContent = 'Adicionar Estoque';
         }
         saveButton.textContent = 'Salvar';
     }
@@ -77,7 +78,6 @@ export function closeSidebar() {
         document.getElementById('productCategory').textContent = 'Selecione uma categoria';
     }
 
-    //title.textContent = 'Adicionar Cliente';
     saveButton.textContent = 'Salvar';
     clearMessages();
 }

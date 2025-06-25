@@ -62,7 +62,7 @@
     flex-direction: column;
 }
 
-.input_sidebar {
+.input_sidebar, .input_data {
     border: none;
     background-color: #F5F5F5;
     border-radius: 5px;
@@ -70,6 +70,10 @@
     height: 50px;
     font-size: 15px;
     margin-bottom: 15px;
+}
+
+.input_data {
+    padding-right: 10px;
 }
 
 .add_button, .add_product_button {
