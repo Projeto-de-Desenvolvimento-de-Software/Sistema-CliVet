@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 
 import { createClient, renderClients, getClientById, searchClients, updateClient, deleteClient } from "../controllers/clientController.js"
 import { createProduct, getProductById, getProductsByCategory, renderProducts, searchProducts, updateProduct, deleteProduct } from "../controllers/productController.js";
-import { createStock } from "../controllers/stockController.js";
+import { createStock, renderStock, getStockById, searchStock, updateStock, deleteStock } from "../controllers/stockController.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
@@ -32,7 +32,12 @@ app.put("/produto/editar/:idProduto", updateProduct);
 app.delete("/produto/:idProduto", deleteProduct);
 app.get('/buscarProdutoPorCategoria', getProductsByCategory);
 
+app.get('/estoque', renderStock);
 app.post('/stock', createStock);
+app.get('/estoque/:idEstoque', getStockById);
+app.get('/buscarEstoque', searchStock);
+app.put("/estoque/editar/:idEstoque", updateStock);
+app.delete('/estoque/:idEstoque', deleteStock);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
