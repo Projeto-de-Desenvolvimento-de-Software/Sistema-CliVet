@@ -2,8 +2,10 @@ import { openSidebar } from './sideBar.js';
 
 export let currentPage = 1;
 let currentProductPage = 1;
+let currentStockPage = 1;
 const itemsPerPage = 10;
 const productItemsPerPage = 10;
+const stockItemsPerPage = 10;
 
 function renderPagination(dataList, totalPages, currentPage, updateFunction) {
     const paginationContainer = document.createElement('div');
@@ -162,4 +164,91 @@ export async function displayProducts(produto = null, page = 1) {
 
     listContainer.appendChild(table);
     listContainer.appendChild(renderPagination(produto, totalPages, currentProductPage, displayProducts));
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    if (isNaN(date)) return '';
+    return date.toLocaleDateString('pt-BR');
+}
+
+export async function displayStock(estoque = null, page = 1) {
+    const listContainer = document.getElementById('stock_list_container');
+    if (!listContainer) return;
+
+    listContainer.innerHTML = '';
+    currentStockPage = page;
+
+    if (!estoque) {
+        try {
+            const response = await fetch('/estoque');
+            estoque = await response.json();
+
+            if (estoque && !Array.isArray(estoque)) {
+                estoque = estoque.data || [];
+            }
+
+        } catch (error) {
+            listContainer.innerHTML = '<p class="no_products_message">Erro ao carregar o estoque.</p>';
+            return;
+        }
+    }
+
+    if (!Array.isArray(estoque)) estoque = [];
+
+    if (estoque.length === 0) {
+        const searchInputStock= document.getElementById('search_stock_input');
+        const isSearching = searchInputStock && searchInputStock.value.trim().length > 0;
+
+        listContainer.innerHTML = isSearching
+            ? '<p class="no_stock_message">Nenhum estoque encontrado.</p>'
+            : '<p class="no_stock_message">Nenhum estoque cadastrado.</p>';
+        return;
+    }
+
+    const totalPages = Math.ceil(estoque.length / stockItemsPerPage);
+    const startIndex = (page - 1) * stockItemsPerPage;
+    const endIndex = startIndex + stockItemsPerPage;
+    const estoquePaginado = estoque.slice(startIndex, endIndex);
+        
+    const table = document.createElement('table');
+    table.classList.add('pages_table');
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Descrição</th>
+                <th>Quantidade</th>
+                <th>Data Entrada</th>
+                <th>Validade</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    `;
+
+    const tbody = table.querySelector('tbody');
+
+    estoquePaginado.forEach((stock) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${stock.nomeProduto}</td>
+            <td>${stock.descricaoProduto}</td>
+            <td>${stock.quantidade}</td>
+            <td>${formatDate(stock.dataEntrada)}</td>
+            <td>${formatDate(stock.validade)}</td>
+            <td class="actions_cell">
+                <button class="edit_button" onclick="openSidebar(null, null, null,'${stock.idEstoque}')">
+                    <i class="fa-solid fa-pencil"></i> Editar
+                </button>
+                <button class="delete_button" onclick="deleteStock('${stock.idEstoque}')">
+                    <i class="fa-solid fa-trash"></i> Excluir
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    listContainer.appendChild(table);
+    listContainer.appendChild(renderPagination(estoque, totalPages, currentStockPage, displayStock));
 }

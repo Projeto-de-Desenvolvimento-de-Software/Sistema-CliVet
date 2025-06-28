@@ -1,4 +1,4 @@
-import { displayClients, displayProducts } from './pagination.js';
+import { displayClients, displayProducts, displayStock } from './pagination.js';
 import { deleteClient, deleteProduct, confirmDeleteListeners } from './modal.js';
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -40,28 +40,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
    function setupSearch(inputId, endpoint, displayCallback, paramName) {
-    const inputElement = document.getElementById(inputId);
-    if (inputElement) {
-        inputElement.addEventListener('input', async () => {
-            const query = inputElement.value.toLowerCase().trim();
+        const inputElement = document.getElementById(inputId);
+        if (inputElement) {
+            inputElement.addEventListener('input', async () => {
+                const query = inputElement.value.toLowerCase().trim();
 
-            try {
-                const response = await fetch(`/${endpoint}?${paramName}=${encodeURIComponent(query)}`);
-                if (!response.ok) return displayCallback([]);
-                const results = await response.json();
-                displayCallback(results);
-            } catch (error) {
-                console.error(`Erro ao buscar em /${endpoint}:`, error);
-            }
-        });
-    }
+                try {
+                    const response = await fetch(`/${endpoint}?${paramName}=${encodeURIComponent(query)}`);
+                    if (!response.ok) return displayCallback([]);
+                    const results = await response.json();
+                    displayCallback(results);
+                } catch (error) {
+                    console.error(`Erro ao buscar em /${endpoint}:`, error);
+                }
+            });
+        }
     }
 
     setupSearch('search_input', 'buscar', displayClients, 'nome');
     setupSearch('search_product_input', 'buscarProduto', displayProducts, 'nomeProduto');
+    setupSearch('search_stock_input', 'buscarEstoque', displayStock, 'pesquisa')
 
     displayClients();
     displayProducts();
+    displayStock();
     confirmDeleteListeners();
 });
 

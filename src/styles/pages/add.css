@@ -98,7 +98,7 @@ main {
     background-color: #f1f1f1; 
 }
 
-.no_clients_message, .no_products_message {
+.no_clients_message, .no_products_message, .no_stock_message {
     text-align: center;
     color: #808080;
     margin-top: 20px;
@@ -157,7 +157,9 @@ main {
     background-color: #f0f0f0;
     cursor: pointer;
     border-radius: 4px;
+    font-size: 14px;
 }
+
 .pagination_button.active {
     background-color: #1B5C59; 
     color: white;

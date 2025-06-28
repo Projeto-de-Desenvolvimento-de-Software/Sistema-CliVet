@@ -55,3 +55,34 @@ export function validateFormProduct(productName, productCategory, productPrice) 
     }
     return true;
 }
+
+export function validateFormStock(productCategory, numericQuantity, entryDate, expireDate) {
+    clearMessages();
+    
+    if (productCategory == 'Selecione uma categoria') {
+        showMessage('O campo Categoria é obrigatório.', 'error');
+        return false;
+    }
+
+    if (!numericQuantity) {
+        showMessage('O campo Quantidade é obrigatório.', 'error');
+        return false;
+    }
+
+    if (!entryDate) {
+        showMessage('O campo Data Entrada é obrigatório.', 'error');
+        return false;
+    }
+
+    if (!expireDate) {
+        showMessage('O campo Validade é obrigatório.', 'error');
+        return false;
+    }
+
+    if (expireDate <= entryDate) {
+        showMessage('A data de validade deve ser posterior à data de entrada.', 'error');
+        return false;
+    }
+
+    return true;
+}

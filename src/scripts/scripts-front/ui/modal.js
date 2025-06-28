@@ -1,8 +1,9 @@
-import { displayClients, displayProducts } from './pagination.js';
+import { displayClients, displayProducts, displayStock } from './pagination.js';
 import { showMessage } from './messages.js';
 
 let clientToDeleteId = null;
 let productToDeleteId = null;
+let stockToDeleteId = null;
 
 export function deleteClient(id) {
     clientToDeleteId = id;
@@ -36,12 +37,26 @@ export function deleteProduct(idProduto) {
         });
 }
 
+export function deleteStock(idEstoque) {
+    stockToDeleteId = idEstoque;
+    const modal = document.getElementById('confirmModal');
+    const message = document.getElementById('modalMessage');
+
+    fetch(`/estoque/${idEstoque}`)
+        .then(res => res.json())
+        .then(stock => {
+            message.textContent = `Tem certeza que deseja excluir o estoque do produto ${stock.nomeProduto}?`;
+            modal.style.display = 'flex';
+        })
+        .catch(() => {
+            showMessage('Erro ao buscar estoque. Verifique a conexão com o servidor.', 'error');
+        });
+}
+
 export function confirmDeleteListeners() {
     document.getElementById('confirmYes').addEventListener('click', async function () {
-
-            try {
-
-                if (clientToDeleteId !== null) {
+        try {
+            if (clientToDeleteId !== null) {
                 const response = await fetch(`/cliente/${clientToDeleteId}`, {
                     method: 'DELETE'
                 });
@@ -51,7 +66,9 @@ export function confirmDeleteListeners() {
                 }
                 await displayClients();
                 showSuccessModal();
-                }  else if (productToDeleteId !== null) {
+                clientToDeleteId = null;
+
+            } else if (productToDeleteId !== null) {
                 const response = await fetch(`/produto/${productToDeleteId}`, {
                     method: 'DELETE'
                 });
@@ -62,18 +79,32 @@ export function confirmDeleteListeners() {
                 await displayProducts();
                 showSuccessModal();
                 productToDeleteId = null;
+
+            } else if (stockToDeleteId !== null) {
+                const response = await fetch(`/estoque/${stockToDeleteId}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Erro ao excluir estoque');
+                }
+                await displayStock();
+                showSuccessModal();
+                stockToDeleteId = null;
             }
 
-            } catch (error) {
-                showMessage(error.message, 'error');
-            }
-            
+        } catch (error) {
+            showMessage(error.message, 'error');
+        }
+
         document.getElementById('confirmModal').style.display = 'none';
+    
     });
 
     document.getElementById('confirmNo').addEventListener('click', function () {
         clientToDeleteId = null;
         productToDeleteId = null;
+        stockToDeleteId = null;
         document.getElementById('confirmModal').style.display = 'none';
     });
 }
@@ -88,3 +119,4 @@ function showSuccessModal() {
 
 window.deleteClient = deleteClient;
 window.deleteProduct = deleteProduct;
+window.deleteStock = deleteStock;

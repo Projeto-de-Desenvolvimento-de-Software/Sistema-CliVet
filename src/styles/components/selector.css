@@ -17,6 +17,8 @@
     padding: 1em;
     cursor: pointer;
     transition: background 0.3s;
+    gap: 1px;
+    height: 45px;
 }
 
 .select-clicked {

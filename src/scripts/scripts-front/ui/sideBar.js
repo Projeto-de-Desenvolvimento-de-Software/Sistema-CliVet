@@ -1,8 +1,8 @@
 import { clearMessages, showMessage } from './messages.js';
-import { displayClients, displayProducts } from './pagination.js';
-import { validateFormClient, validateFormProduct } from './validation.js';
+import { displayClients, displayProducts, displayStock } from './pagination.js';
+import { validateFormClient, validateFormProduct, validateFormStock } from './validation.js';
 
-export async function openSidebar(mode = null, id = null, idProduto = null) {
+export async function openSidebar(mode = null, id = null, idProduto = null, idEstoque = null) {
     const sidebar = document.querySelector('.add_sidebar');
     const form = document.getElementById('addForm');
     const title = sidebar.querySelector('.title_sidebar');
@@ -45,14 +45,56 @@ export async function openSidebar(mode = null, id = null, idProduto = null) {
             title.textContent = 'Editar Produto';
             saveButton.textContent = 'Atualizar';
         } catch (error) {
-            showMessage('Erro ao carregar dados do cliente.', 'error');
+            showMessage('Erro ao carregar dados do produto.', 'error');
+            return;
+        }
+    } else if (idEstoque) {
+        try {
+            const response = await fetch(`/estoque/${idEstoque}`);
+            if (!response.ok) throw new Error('Erro ao buscar estoque');
+            const stock = await response.json();
+
+            if (stock.categoriaProduto) {
+                const categoryValueFromDB = stock.categoriaProduto; 
+                const menuItem = document.querySelector(`.menu li[data-value="${categoryValueFromDB}"]`);
+
+                if (menuItem) {
+                    document.getElementById('productCategory').textContent = menuItem.textContent;
+                } else {
+                    document.getElementById('productCategory').textContent = categoryValueFromDB;
+                }
+            }
+        
+            const productSpan = document.getElementById('productSpan');
+            if (productSpan && stock.nomeProduto) {
+                productSpan.textContent = stock.nomeProduto; 
+                productSpan.setAttribute('data-value', stock.idProduto);
+            }
+
+            document.getElementById('inputQuantity').value = stock.quantidade;
+
+            if (stock.dataEntrada) {
+            document.getElementById('stockEntryDate').value = stock.dataEntrada.slice(0, 10);
+            }
+            if (stock.validade) {
+                document.getElementById('stockExpiryDate').value = stock.validade.slice(0, 10);
+            }
+        
+            form.querySelector('#editIndex').value = stock.idEstoque;
+
+            title.textContent = 'Editar Estoque';
+            saveButton.textContent = 'Atualizar';
+        } catch (error) {
+            showMessage('Erro ao carregar dados do estoque.', 'error');
             return;
         }
     } else {
         if (mode === 'addProduct') {
             title.textContent = 'Adicionar Produto';
+
         } else if (mode === 'addClient'){
             title.textContent = 'Adicionar Cliente';
+
         } else {
             title.textContent = 'Adicionar Estoque';
         }
@@ -76,6 +118,7 @@ export function closeSidebar() {
         form.reset();
         form.querySelector('#editIndex').value = '';
         document.getElementById('productCategory').textContent = 'Selecione uma categoria';
+        document.getElementById('productSpan').textContent = 'Selecione a categoria';
     }
 
     saveButton.textContent = 'Salvar';
@@ -175,7 +218,7 @@ export async function saveOrUpdateProduct() {
 
     if (!validateFormProduct(productName, productCategory, productPrice)) return;
 
-   try {
+    try {
 
     let response;
 
@@ -215,7 +258,75 @@ export async function saveOrUpdateProduct() {
     }
 }
 
-window.saveOrUpdateProduct = saveOrUpdateProduct; 
+export async function saveOrUpdateStock() {
+    const productCategory = document.getElementById('productCategory').textContent;
+    const productLoaded = document.getElementById('productSpan').getAttribute('data-value');
+    const productQuantity = document.getElementById('inputQuantity').value;
+    const entryDate = document.getElementById('stockEntryDate').value;
+    const expireDate = document.getElementById('stockExpiryDate').value;
+    const form = document.getElementById('addForm');
+    const editIndexInput = form.querySelector('#editIndex');
+
+    if (!productLoaded) {
+        showMessage('O campo Produto é obrigatório.', 'error');
+        return; 
+    }
+
+    const stockId = editIndexInput.value;
+
+    const numericQuantity = parseInt(productQuantity);
+
+    const stockData = {
+        idProduto: productLoaded.trim(),
+        quantidade: numericQuantity,
+        dataEntrada: entryDate,
+        validade: expireDate    
+    };
+
+    if (!validateFormStock(productCategory, numericQuantity, entryDate, expireDate)) return;
+
+    try {
+
+    let response;
+
+        if (stockId) {
+            response = await fetch(`/estoque/editar/${stockId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(stockData)
+            });
+        } else {
+            response = await fetch('/estoque', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(stockData)
+        });
+        }
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Erro ao salvar Estoque');
+
+         const successMessage = stockId
+            ? 'Estoque atualizado com sucesso!'
+            : 'Estoque salvo com sucesso!';
+        showMessage(successMessage, 'success');
+        
+        form.reset();
+        editIndexInput.value = '';
+
+        await displayStock();
+
+        setTimeout(() => {
+            clearMessages();
+            closeSidebar();
+        }, 500);
+    } catch (error) {
+        showMessage(error.message, 'error');
+    }
+}
+
 window.openSidebar = openSidebar;
 window.closeSidebar = closeSidebar;
 window.saveOrUpdateClient = saveOrUpdateClient;
+window.saveOrUpdateProduct = saveOrUpdateProduct;
+window.saveOrUpdateStock = saveOrUpdateStock; 

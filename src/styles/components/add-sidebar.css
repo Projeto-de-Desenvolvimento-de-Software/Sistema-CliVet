@@ -44,8 +44,8 @@
     right: 20px;
     top: 20px;
     border-radius: 100%;
-    height: 40px;
-    width: 40px;
+    height: 30px;
+    width: 30px;
 }
 
 #close_sidebar_button:hover {
@@ -54,7 +54,7 @@
 
 .title_sidebar {
     margin-top: 15px;
-    margin-bottom: 30px;
+    margin-bottom: 18px;
 }
 
 .form_sidebar {

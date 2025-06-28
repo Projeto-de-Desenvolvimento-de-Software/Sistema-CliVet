@@ -104,11 +104,20 @@ export const updateProduct = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
     const { idProduto } = req.params;
-    const [result] = await pool.query("DELETE FROM Produto WHERE idProduto = ?", [idProduto]);
-  
-    if (result.affectedRows === 1) {
-      res.json({ message: "Produto deletado!" });
-    } else {
-      res.status(404).json({ error: "Produto não encontrado." });
+
+    try {
+        await pool.query("DELETE FROM Estoque WHERE fk_Produto_idProduto = ?", [idProduto]);
+
+        const [result] = await pool.query("DELETE FROM Produto WHERE idProduto = ?", [idProduto]);
+
+        if (result.affectedRows === 1) {
+            res.json({ message: "Produto deletado!" });
+        } else {
+            res.status(404).json({ error: "Produto não encontrado." });
+        }
+
+    } catch (error) {
+        console.error("Erro ao deletar produto:", error);
+        res.status(500).json({ error: "Erro ao deletar o produto." });
     }
 };

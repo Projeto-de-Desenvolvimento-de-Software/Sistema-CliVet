@@ -30,7 +30,19 @@ export const getStockById = async (req, res) => {
     const { idEstoque } = req.params;
 
     try {
-        const [rows] = await pool.query("SELECT * FROM Estoque WHERE idEstoque = ?", [idEstoque]);
+          const [rows] = await pool.query(`
+            SELECT 
+              e.idEstoque,
+              e.quantidade,
+              e.dataEntrada,
+              e.validade,
+              p.idProduto,
+              p.nomeProduto,
+              p.categoriaProduto
+            FROM Estoque e
+            JOIN Produto p ON e.fk_Produto_idProduto = p.idProduto
+            WHERE e.idEstoque = ?
+        `, [idEstoque]);
 
         if (rows.length === 0) {
             return res.status(404).json({ error: "Estoque não encontrado." });

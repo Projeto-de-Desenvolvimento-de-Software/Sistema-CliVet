@@ -76,7 +76,7 @@
             <p class="add_title">Lista de Estoque</p>
             <div class="search_add_container">
                 <div class="input_wrapper">
-                    <input type="text" placeholder="Pesquisar" id="search_product_input" class="search">
+                    <input type="text" placeholder="Pesquisar" id="search_stock_input" class="search">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </div>
                 <button class="add_button" onclick="openSidebar('addStock')">
@@ -85,7 +85,7 @@
                 </button>
             </div>
         </div>
-        <div id="product_list_container"></div>
+        <div id="stock_list_container"></div>
         <div id="pagination_container" class="pagination_container"></div>
 
         <div class="overlay"></div>
@@ -101,7 +101,7 @@
                         <div class="caret"></div>
                     </div>
                     <ul class="menu">
-                        <li>Selecione uma categoria</li>
+                        <li data-value="">Selecione uma categoria</li>
                         <li data-value="racao">Ração</li>
                         <li data-value="petisco">Petisco</li>
                         <li data-value="acessorio">Acessório</li>
@@ -110,9 +110,9 @@
                     </ul>
                 </div>
                 <p>Produto*</p>
-                <div class="dropdown disabled" id="product-dropdown">
+                <div class="dropdown disabled" id="dropdown">
                     <div class="select">
-                        <span class="selected" id="product">Selecione a categoria</span>
+                        <span class="selected" id="productSpan">Selecione a categoria</span>
                         <div class="caret"></div>
                     </div>
                     <ul class="menu" id="productMenu">
@@ -129,7 +129,7 @@
                 <input type="date" class="input_data" id="stockEntryDate">
                 <p>Validade*</p>
                 <input type="date" class="input_data" id="stockExpiryDate">
-                <button type="button" class="add_button" onclick="saveOrUpdateProduct()">Salvar</button>
+                <button type="button" class="add_button" onclick="saveOrUpdateStock()">Salvar</button>
             </form>
         </aside>  
 
@@ -151,5 +151,6 @@
     <script type="module" src="../../scripts/scripts-front/ui/main.js"></script>
     <script src="../../scripts/scripts-front/ui/selector.js"></script>
     <script src="../../scripts/scripts-front/ui/quantityInput.js"></script>
+    <script src="../../scripts/scripts-front/ui/loadProducts.js"></script>
 </body>
 </html> 

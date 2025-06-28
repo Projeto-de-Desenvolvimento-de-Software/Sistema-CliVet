@@ -33,7 +33,7 @@ app.delete("/produto/:idProduto", deleteProduct);
 app.get('/buscarProdutoPorCategoria', getProductsByCategory);
 
 app.get('/estoque', renderStock);
-app.post('/stock', createStock);
+app.post('/estoque', createStock);
 app.get('/estoque/:idEstoque', getStockById);
 app.get('/buscarEstoque', searchStock);
 app.put("/estoque/editar/:idEstoque", updateStock);
