@@ -2,7 +2,7 @@ import { clearMessages, showMessage } from './messages.js';
 import { displayClients, displayProducts, displayStock } from './pagination.js';
 import { validateFormClient, validateFormProduct, validateFormStock } from './validation.js';
 
-export async function openSidebar(mode = null, id = null, idProduto = null, idEstoque = null) {
+export async function openSidebar(mode = null, idCliente = null, idProduto = null, idEstoque = null) {
     const sidebar = document.querySelector('.add_sidebar');
     const form = document.getElementById('addForm');
     const title = sidebar.querySelector('.title_sidebar');
@@ -12,9 +12,9 @@ export async function openSidebar(mode = null, id = null, idProduto = null, idEs
     clearMessages();
     form.querySelector('#editIndex').value = '';
 
-    if (id) {
+    if (idCliente) {
         try {
-        const response = await fetch(`/cliente/${id}`);
+        const response = await fetch(`/cliente/${idCliente}`);
             if (!response.ok) throw new Error('Erro ao buscar cliente');
             const client = await response.json();
 
@@ -22,7 +22,7 @@ export async function openSidebar(mode = null, id = null, idProduto = null, idEs
             document.getElementById('clientEmail').value = client.email;
             document.getElementById('clientPhone').value = client.telefone;
             document.getElementById('clientAddress').value = client.endereco || '';
-            form.querySelector('#editIndex').value = client.id;
+            form.querySelector('#editIndex').value = client.idCliente;
 
             title.textContent = 'Editar Cliente';
             saveButton.textContent = 'Atualizar';

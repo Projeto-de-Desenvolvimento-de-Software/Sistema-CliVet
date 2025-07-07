@@ -78,10 +78,10 @@ export async function displayClients(cliente = null, page = 1) {
             <td>${client.telefone}</td>
             <td>${client.endereco || '-'}</td>
             <td class="actions_cell">
-                <button class="edit_button" onclick="openSidebar(null, '${client.id}')">
+                <button class="edit_button" onclick="openSidebar(null, '${client.idCliente}')">
                     <i class="fa-solid fa-pencil"></i> Editar
                 </button>
-                <button class="delete_button" onclick="deleteClient('${client.id}')">
+                <button class="delete_button" onclick="deleteClient('${client.idCliente}')">
                     <i class="fa-solid fa-trash"></i> Excluir
                 </button>
             </td>

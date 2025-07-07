@@ -15,10 +15,10 @@ export const createClient = async (req, res) => {
 };
 
 export const getClientById = async (req, res) => {
-    const { id } = req.params;
+    const { idCliente } = req.params;
 
     try {
-        const [rows] = await pool.query("SELECT * FROM Cliente WHERE id = ?", [id]);
+        const [rows] = await pool.query("SELECT * FROM Cliente WHERE idCliente = ?", [idCliente]);
 
         if (rows.length === 0) {
             return res.status(404).json({ error: "Cliente não encontrado." });
@@ -50,10 +50,10 @@ export const searchClients = async (req, res) => {
 };
 
 export const updateClient = async (req, res) => {
-    const { id } = req.params;
+    const { idCliente } = req.params;
     const { nome, email, telefone, endereco } = req.body;
 
-    const [currentClient] = await pool.query("SELECT * FROM Cliente WHERE id = ?", [id]);
+    const [currentClient] = await pool.query("SELECT * FROM Cliente WHERE idCliente = ?", [idCliente]);
     if (currentClient.length === 0) {
         return res.status(404).json({ error: "Cliente não encontrado." });
     } else if (
@@ -65,22 +65,22 @@ export const updateClient = async (req, res) => {
         return res.status(200).json({ message: "Nenhuma alteração foi feita." });
     }
 
-    const [rows] = await pool.query("SELECT * FROM Cliente WHERE email = ? AND id != ?", [email, id]);
+    const [rows] = await pool.query("SELECT * FROM Cliente WHERE email = ? AND idCliente != ?", [email, idCliente]);
     if (rows.length > 0) {
         return res.status(400).json({ error: "E-mail já está sendo utilizado." });
     }
 
     await pool.query(
-        "UPDATE Cliente SET nome = ?, email = ?, telefone = ?, endereco = ? WHERE id = ?",
-        [nome, email, telefone, endereco, id]
+        "UPDATE Cliente SET nome = ?, email = ?, telefone = ?, endereco = ? WHERE idCliente = ?",
+        [nome, email, telefone, endereco, idCliente]
     );
 
     res.status(200).json({ message: "Cliente atualizado com sucesso!" });
 };
 
 export const deleteClient = async (req, res) => {
-    const { id } = req.params;
-    const [result] = await pool.query("DELETE FROM Cliente WHERE id = ?", [id]);
+    const { idCliente } = req.params;
+    const [result] = await pool.query("DELETE FROM Cliente WHERE idCliente = ?", [idCliente]);
   
     if (result.affectedRows === 1) {
       res.json({ message: "Cliente deletado!" });
