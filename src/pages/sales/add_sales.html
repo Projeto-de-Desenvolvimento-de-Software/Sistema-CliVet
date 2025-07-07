@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../../styles/components/add-sidebar.css">
     <link rel="stylesheet" href="../../styles/components/modals.css"> 
     <link rel="stylesheet" href="../../styles/components/selector.css">
+    <link rel="stylesheet" href="../../styles/components/quantity-input.css">
     <link rel="stylesheet" href="../../styles/pages/add.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
@@ -43,7 +44,7 @@
                         </span>
                     </a>
                 </li>
-                <li class="side_item active">
+                <li class="side_item">
                     <a href="../product/add_product.html">
                         <i class="fa-solid fa-table-cells-large"></i>
                         <span class="item-description">
@@ -59,7 +60,7 @@
                         </span>
                     </a>
                 </li>
-                <li class="side_item">
+                <li class="side_item active">
                     <a href="../sales/add_sales.html">
                         <i class="fa-solid fa-bell"></i>
                         <span class="item-description">
@@ -72,49 +73,60 @@
     </nav>
     <main>
         <div class="add_content">
-            <p class="add_title">Lista de Produtos</p>
+            <p class="add_title">Lista de Vendas</p>
             <div class="search_add_container">
                 <div class="input_wrapper">
-                    <input type="text" placeholder="Pesquisar" id="search_product_input" class="search">
+                    <input type="text" placeholder="Pesquisar" id="search_stock_input" class="search">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </div>
-                <button class="add_button" onclick="openSidebar('addProduct')">
+                <button class="add_button" onclick="openSidebar('addSales')">
                     <i class="fa-solid fa-plus"></i>
-                    Adicionar Produto
+                    Adicionar Venda
                 </button>
             </div>
         </div>
-        <div id="product_list_container"></div>
-         <div id="pagination_container" class="pagination_container"></div>
+        <div id="stock_list_container"></div>
+        <div id="pagination_container" class="pagination_container"></div>
 
         <div class="overlay"></div>
           <aside class="add_sidebar">
             <i id="close_sidebar_button" class="fa-solid fa-xmark" onclick="closeSidebar()"></i>  
-            <h2 class="title_sidebar">Adicionar Produto</h2>
+            <h2 class="title_sidebar">Adicionar Venda</h2>
             <form class="form_sidebar" id="addForm">
                 <input type="hidden" id="editIndex"> 
-                <p>Nome do Produto*</p>
-                <input type="text" class="input_sidebar" id="productName" required>
-                <p>Descrição</p>
-                <input type="text" class="input_sidebar" id="productDescription" required>
-                <p>Categoria*</p>
-                <div class="dropdown">
+                <p>Cliente*</p>
+                <div class="dropdown disabled" id="dropdown">
                     <div class="select">
-                        <span class="selected" id="productCategory">Selecione uma categoria</span>
+                        <span class="selected" id="productSpan">Selecione um cliente</span>
                         <div class="caret"></div>
                     </div>
-                    <ul class="menu">
-                        <li>Selecione uma categoria</li>
-                        <li data-value="racao">Ração</li>
-                        <li data-value="petisco">Petisco</li>
-                        <li data-value="acessorio">Acessório</li>
-                        <li data-value="item">Item</li>
-                        <li data-value="higiene">Higiene</li>
+                    <ul class="menu" id="productMenu">
+                        
                     </ul>
                 </div>
-                <p>Preço*</p>
-                <input type="text" class="input_sidebar" id="productPrice" placeholder="R$ 0,00">
-                <button type="button" class="add_button" onclick="saveOrUpdateProduct()">Salvar</button>
+                <p>Produto*</p>
+                <div class="dropdown disabled" id="dropdown">
+                    <div class="select">
+                        <span class="selected" id="productSpan">Selecione um produto</span>
+                        <div class="caret"></div>
+                    </div>
+                    <ul class="menu" id="productMenu">
+                        
+                    </ul>
+                </div>
+                <p>Quantidade*</p>
+                <div class="input_stock">
+                    <button type="button" id="decrement">-</button>
+                    <input type="number" min="0" value="0" id="inputQuantity">
+                    <button type="button" id="increment">+</button>
+                </div>
+                <p>Preço Unitário</p>
+                <input type="text" class="input_sidebar" id="productPrice" placeholder="R$ 0,00" readonly>
+                <p>Data Venda*</p>
+                <input type="date" class="input_data" id="stockEntryDate">
+                <p>Valor Total</p>
+                <input type="text" class="input_sidebar" id="productPrice" placeholder="R$ 0,00" readonly>
+                <button type="button" class="add_button" onclick="saveOrUpdateStock()">Salvar</button>
             </form>
         </aside>  
 
@@ -128,12 +140,14 @@
           
         <div id="successModal" class="modal" style="display: none;">
             <div class="modal-content">
-              <p>Produto excluído com sucesso!</p>
+              <p>Venda excluída com sucesso!</p>
             </div>
         </div>
         
     </main>
     <script type="module" src="../../scripts/scripts-front/ui/main.js"></script>
     <script src="../../scripts/scripts-front/ui/selector.js"></script>
+    <script src="../../scripts/scripts-front/ui/quantityInput.js"></script>
+    <script src="../../scripts/scripts-front/ui/loadProducts.js"></script>
 </body>
 </html> 

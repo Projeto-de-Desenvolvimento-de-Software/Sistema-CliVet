@@ -9,6 +9,7 @@
     padding: 20px;
     transition: right 0.3s ease; 
     z-index: 1001;
+    overflow-y: auto;
 }
 
 .add_sidebar.open {

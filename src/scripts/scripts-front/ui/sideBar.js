@@ -95,8 +95,11 @@ export async function openSidebar(mode = null, idCliente = null, idProduto = nul
         } else if (mode === 'addClient'){
             title.textContent = 'Adicionar Cliente';
 
-        } else {
+        } else if (mode === 'addStock'){
             title.textContent = 'Adicionar Estoque';
+            
+        } else {
+            title.textContent = 'Adicionar Venda'
         }
         saveButton.textContent = 'Salvar';
     }
