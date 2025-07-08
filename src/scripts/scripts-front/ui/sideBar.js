@@ -94,8 +94,6 @@ export async function openSidebar(mode = null, idCliente = null, idProduto = nul
             if (!response.ok) throw new Error('Erro ao buscar Venda');
             const sale = await response.json();
 
-            //document.getElementById('clientSpan').textContent = sale.nome;
-            //document.getElementById('productSpanSale').textContent = sale.nomeProduto;
             document.getElementById('inputQuantity').value = sale.quantidade;
             document.getElementById('productPrice').value = sale.precoUnitario;
             document.getElementById('totalValue').value = sale.valorTotal;
