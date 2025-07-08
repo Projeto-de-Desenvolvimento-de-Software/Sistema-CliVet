@@ -40,10 +40,13 @@ export const createSale = async (req, res) => {
 
     const idVenda = vendaResult.insertId;
 
-    await pool.query(
-      "INSERT INTO Itens_Venda (fk_Venda_idVenda, fk_Produto_idProduto, precoUnitario, quantidade) VALUES (?, ?, ?, ?)",
+    await pool.query(`
+      INSERT INTO Itens_Venda (fk_Venda_idVenda, fk_Produto_idProduto, precoUnitario, quantidade)
+      VALUES (?, ?, ?, ?)
+      `,
       [idVenda, idProduto, precoUnitario, quantidadeVendida]
     );
+
 
     const newQuant = stockQuant - quantidadeVendida;
 
@@ -76,7 +79,7 @@ export const getSaleById = async (req, res) => {
             FROM Venda v
             JOIN Cliente c ON v.fk_Cliente_idCliente = c.idCliente
             JOIN Itens_Venda iv ON iv.fk_Venda_idVenda = v.idVenda
-            JOIN Produto p ON iv.fk_Produto_idProduto = p.idProduto
+            LEFT JOIN Produto p ON iv.fk_Produto_idProduto = p.idProduto
             WHERE v.idVenda = ?
         `, [idVenda]);
 
@@ -94,15 +97,16 @@ export const getSaleById = async (req, res) => {
 export const renderSale = async (req, res) => {
   try {
     const [sales] = await pool.query(`
-      SELECT 
-        v.idVenda, v.dataVenda, v.valorTotal,
-        c.idCliente, c.nome, c.email,
-        p.idProduto, p.nomeProduto, p.categoriaProduto,
-        iv.precoUnitario, iv.quantidade
-      FROM Venda v
-      JOIN Cliente c ON v.fk_Cliente_idCliente = c.idCliente
-      JOIN Itens_Venda iv ON iv.fk_Venda_idVenda = v.idVenda
-      JOIN Produto p ON iv.fk_Produto_idProduto = p.idProduto
+     SELECT 
+      v.idVenda, v.dataVenda, v.valorTotal,
+      c.idCliente, c.nome, c.email,
+      COALESCE(p.idProduto, NULL) AS idProduto,
+      COALESCE(p.nomeProduto, 'Produto removido') AS nomeProduto,
+      iv.precoUnitario, iv.quantidade
+    FROM Venda v
+    JOIN Cliente c ON v.fk_Cliente_idCliente = c.idCliente
+    JOIN Itens_Venda iv ON iv.fk_Venda_idVenda = v.idVenda
+    LEFT JOIN Produto p ON iv.fk_Produto_idProduto = p.idProduto
     `);
 
     if (sales.length === 0) {
@@ -124,13 +128,15 @@ export const searchSale = async (req, res) => {
       SELECT 
         v.idVenda, v.dataVenda, v.valorTotal,
         c.idCliente, c.nome, c.email,
-        p.idProduto, p.nomeProduto, p.categoriaProduto,
+        p.idProduto,   IFNULL(p.nomeProduto, 'Produto removido') AS nomeProduto,
         iv.precoUnitario, iv.quantidade
       FROM Venda v
       JOIN Cliente c ON v.fk_Cliente_idCliente = c.idCliente
       JOIN Itens_Venda iv ON iv.fk_Venda_idVenda = v.idVenda
-      JOIN Produto p ON iv.fk_Produto_idProduto = p.idProduto
-      WHERE c.nome LIKE ? OR p.nomeProduto LIKE ? OR DATE(v.dataVenda) LIKE ?`, 
+      LEFT JOIN Produto p ON iv.fk_Produto_idProduto = p.idProduto
+      WHERE c.nome LIKE ? OR 
+        IFNULL(p.nomeProduto, 'Produto removido') LIKE ? OR 
+        DATE(v.dataVenda) LIKE ?`, 
         [`%${pesquisa}%`, `%${pesquisa}%`, `%${pesquisa}%`]);
 
     res.json(sales);
@@ -145,80 +151,127 @@ export const updateSale = async (req, res) => {
   const { idProduto, quantidadeVendida, idCliente, dataVenda } = req.body;
 
   try {
-    const [itensVenda] = await pool.query(`
-      SELECT iv.fk_Produto_idProduto AS idProduto, iv.quantidade
-      FROM Itens_Venda iv
-      WHERE iv.fk_Venda_idVenda = ?
-    `, [idVenda]);
+    const [saleItems] = await pool.query(
+      "SELECT iv.fk_Produto_idProduto AS idProduto, iv.quantidade, iv.precoUnitario, v.dataVenda, v.fk_Cliente_idCliente AS idCliente " +
+      "FROM Itens_Venda iv JOIN Venda v ON iv.fk_Venda_idVenda = v.idVenda WHERE iv.fk_Venda_idVenda = ?",
+      [idVenda]
+    );
 
-    if (itensVenda.length === 0) {
+    if (saleItems.length === 0) {
       return res.status(404).json({ error: "Venda não encontrada." });
     }
 
-    const produtoAntigo = itensVenda[0].idProduto;
-    const quantidadeAntiga = itensVenda[0].quantidade;
+    const oldProductId = saleItems[0].idProduto;
+    const oldQuantity = saleItems[0].quantidade;
+    const oldPrice = saleItems[0].precoUnitario;
+    const oldDate = saleItems[0].dataVenda.toISOString().slice(0, 10);
+    const oldClientId = saleItems[0].idCliente;
 
-    const [estoqueAntigo] = await pool.query(`
-      SELECT quantidade FROM Estoque WHERE fk_Produto_idProduto = ?
-    `, [produtoAntigo]);
-
-    if (estoqueAntigo.length === 0) {
-      return res.status(400).json({ error: "Produto antigo não cadastrado no estoque." });
+    if (
+      Number(oldProductId) === Number(idProduto) &&
+      Number(oldQuantity) === Number(quantidadeVendida) &&
+      oldClientId === Number(idCliente) &&
+      oldDate === dataVenda
+    ) {
+      return res.status(200).json({ message: "Nenhuma alteração foi feita." });
     }
 
-    let estoqueAtualProdutoAntigo = estoqueAntigo[0].quantidade;
+    const productChanged = Number(oldProductId) !== Number(idProduto);
 
-    if (produtoAntigo === idProduto) {
-      estoqueAtualProdutoAntigo += quantidadeAntiga; 
+    const [oldStockRows] = await pool.query(
+      "SELECT quantidade FROM Estoque WHERE fk_Produto_idProduto = ?",
+      [oldProductId]
+    );
+    const oldProductInStock = oldStockRows.length > 0;
+
+    if (productChanged && !oldProductInStock) {
+      return res.status(400).json({ error: "Não é possível alterar o produto da venda, pois o produto antigo foi removido." });
+    }
+
+    if (productChanged && oldProductInStock) {
+      const updatedOldStockQty = oldStockRows[0].quantidade + oldQuantity;
+
+      await pool.query(
+        "UPDATE Estoque SET quantidade = ? WHERE fk_Produto_idProduto = ?",
+        [updatedOldStockQty, oldProductId]
+      );
+    }
+
+    if (productChanged) {
+      const [newProductRows] = await pool.query(
+        "SELECT * FROM Produto WHERE idProduto = ?",
+        [idProduto]
+      );
+
+      if (newProductRows.length === 0) {
+        return res.status(404).json({ error: "Produto não encontrado." });
+      }
+
+      const newUnitPrice = newProductRows[0].precoProduto;
+
+      const [newStockRows] = await pool.query(
+        "SELECT quantidade FROM Estoque WHERE fk_Produto_idProduto = ?",
+        [idProduto]
+      );
+
+      if (newStockRows.length === 0) {
+        return res.status(400).json({ error: "Produto novo não cadastrado no estoque." });
+      }
+
+      if (newStockRows[0].quantidade < quantidadeVendida) {
+        return res.status(400).json({ error: "Estoque insuficiente para a quantidade desejada." });
+      }
+
+      const updatedNewStockQty = newStockRows[0].quantidade - quantidadeVendida;
+
+      await pool.query(
+        "UPDATE Estoque SET quantidade = ? WHERE fk_Produto_idProduto = ?",
+        [updatedNewStockQty, idProduto]
+      );
+
+      const totalValue = newUnitPrice * quantidadeVendida;
+
+      await pool.query(
+        "UPDATE Venda SET dataVenda = ?, valorTotal = ?, fk_Cliente_idCliente = ? WHERE idVenda = ?",
+        [dataVenda, totalValue, idCliente, idVenda]
+      );
+
+      await pool.query(
+        "UPDATE Itens_Venda SET fk_Produto_idProduto = ?, precoUnitario = ?, quantidade = ? WHERE fk_Venda_idVenda = ?",
+        [idProduto, newUnitPrice, quantidadeVendida, idVenda]
+      );
+
     } else {
-      estoqueAtualProdutoAntigo += quantidadeAntiga;
-      await pool.query(`
-        UPDATE Estoque SET quantidade = ? WHERE fk_Produto_idProduto = ?
-      `, [estoqueAtualProdutoAntigo, produtoAntigo]);
+      if (!oldProductInStock && Number(oldQuantity) !== Number(quantidadeVendida)) {
+        return res.status(400).json({ error: "Não é possível alterar a quantidade, pois o produto foi removido do estoque." });
+      }
+
+      if (oldProductInStock) {
+        const currentStockQty = oldStockRows[0].quantidade;
+        const updatedStockQty = currentStockQty + oldQuantity - quantidadeVendida;
+
+        if (updatedStockQty < 0) {
+          return res.status(400).json({ error: "Estoque insuficiente para a quantidade desejada." });
+        }
+
+        await pool.query(
+          "UPDATE Estoque SET quantidade = ? WHERE fk_Produto_idProduto = ?",
+          [updatedStockQty, oldProductId]
+        );
+      }
+
+      const totalValue = oldPrice * quantidadeVendida;
+
+      await pool.query(
+        "UPDATE Venda SET dataVenda = ?, valorTotal = ?, fk_Cliente_idCliente = ? WHERE idVenda = ?",
+        [dataVenda, totalValue, idCliente, idVenda]
+      );
+
+      await pool.query(
+        "UPDATE Itens_Venda SET quantidade = ? WHERE fk_Venda_idVenda = ?",
+        [quantidadeVendida, idVenda]
+      );
     }
-
-    const [produtoNovo] = await pool.query(`
-      SELECT * FROM Produto WHERE idProduto = ?
-    `, [idProduto]);
-
-    if (produtoNovo.length === 0) {
-      return res.status(404).json({ error: "Produto não encontrado." });
-    }
-
-    const precoUnitario = produtoNovo[0].precoProduto; 
-
-    const [estoqueNovo] = await pool.query(`
-      SELECT quantidade FROM Estoque WHERE fk_Produto_idProduto = ?
-    `, [idProduto]);
-
-    if (estoqueNovo.length === 0) {
-      return res.status(400).json({ error: "Produto novo não cadastrado no estoque." });
-    }
-
-    let estoqueAtualProdutoNovo = estoqueNovo[0].quantidade;
-
-    if (produtoAntigo === idProduto) {
-      estoqueAtualProdutoNovo = estoqueAtualProdutoAntigo; 
-    }
-
-    if (estoqueAtualProdutoNovo < quantidadeVendida) {
-      return res.status(400).json({ error: "Estoque insuficiente para a quantidade desejada." });
-    }
-    const novoEstoqueProdutoNovo = estoqueAtualProdutoNovo - quantidadeVendida;
-
-    await pool.query(`
-      UPDATE Estoque SET quantidade = ? WHERE fk_Produto_idProduto = ?
-    `, [novoEstoqueProdutoNovo, idProduto]);
-
-    const valorTotal = precoUnitario * quantidadeVendida;
-
-    await pool.query(`
-      UPDATE Venda SET dataVenda = ?, valorTotal = ?, fk_Cliente_idCliente = ? WHERE idVenda = ?
-    `, [dataVenda, valorTotal, idCliente, idVenda]);
-
-    await pool.query(`
-      UPDATE Itens_Venda SET fk_Produto_idProduto = ?, precoUnitario = ?, quantidade = ? WHERE fk_Venda_idVenda = ?
-    `, [idProduto, precoUnitario, quantidadeVendida, idVenda]);
 
     return res.status(200).json({ message: "Venda atualizada com sucesso!" });
 
@@ -228,57 +281,52 @@ export const updateSale = async (req, res) => {
   }
 };
 
+export const deleteSale = async (req, res) => {
+  const { idVenda } = req.params;
 
+  try {
+    const [saleItems] = await pool.query(
+      "SELECT fk_Produto_idProduto AS idProduto, quantidade FROM Itens_Venda WHERE fk_Venda_idVenda = ?",
+      [idVenda]
+    );
 
-export const deleteSale = async (req, res) => { 
-    const { idVenda } = req.params;
-
-    try {
-        const [items] = await pool.query(`
-            SELECT fk_Produto_idProduto AS idProduto, quantidade
-            FROM Itens_Venda
-            WHERE fk_Venda_idVenda = ?
-        `, [idVenda]);
-
-        if (items.length === 0) {
-            return res.status(404).json({ error: "Venda não encontrada ou sem itens registrados." });
-        }
-
-        for (const item of items) {
-            const { idProduto, quantidade } = item;
-
-            const [estoque] = await pool.query(
-                "SELECT quantidade FROM Estoque WHERE fk_Produto_idProduto = ?",
-                [idProduto]
-            );
-
-            if (estoque.length > 0) {
-                const quantidadeAtual = estoque[0].quantidade;
-                const novaQuantidade = quantidadeAtual + quantidade;
-
-                await pool.query(
-                    "UPDATE Estoque SET quantidade = ? WHERE fk_Produto_idProduto = ?",
-                    [novaQuantidade, idProduto]
-                );
-            } else {
-                console.warn(`Produto ${idProduto} não encontrado no estoque, não foi possível devolver quantidade.`);
-            }
-        }
-
-        await pool.query("DELETE FROM Itens_Venda WHERE fk_Venda_idVenda = ?", [idVenda]);
-
-
-        const [result] = await pool.query("DELETE FROM Venda WHERE idVenda = ?", [idVenda]);
-
-        if (result.affectedRows === 1) {
-            res.json({ message: "Venda deletada e produtos devolvidos ao estoque com sucesso!" });
-        } else {
-            res.status(404).json({ error: "Venda não encontrada." });
-        }
-
-    } catch (error) {
-        console.error("Erro ao deletar venda:", error);
-        res.status(500).json({ error: "Erro interno do servidor." });
+    if (saleItems.length === 0) {
+      return res.status(404).json({ error: "Venda não encontrada ou sem itens registrados." });
     }
-};
 
+    for (const item of saleItems) {
+      const { idProduto, quantidade } = item;
+
+      const [stockRows] = await pool.query(
+        "SELECT quantidade FROM Estoque WHERE fk_Produto_idProduto = ?",
+        [idProduto]
+      );
+
+      if (stockRows.length > 0) {
+        const currentStockQty = stockRows[0].quantidade;
+        const updatedStockQty = currentStockQty + quantidade;
+
+        await pool.query(
+          "UPDATE Estoque SET quantidade = ? WHERE fk_Produto_idProduto = ?",
+          [updatedStockQty, idProduto]
+        );
+      } else {
+        console.warn(`Produto ${idProduto} não encontrado no estoque, não foi possível devolver quantidade.`);
+      }
+    }
+
+    await pool.query("DELETE FROM Itens_Venda WHERE fk_Venda_idVenda = ?", [idVenda]);
+
+    const [result] = await pool.query("DELETE FROM Venda WHERE idVenda = ?", [idVenda]);
+
+    if (result.affectedRows === 1) {
+      res.json({ message: "Venda deletada e produtos devolvidos ao estoque!" });
+    } else {
+      res.status(404).json({ error: "Venda não encontrada." });
+    }
+
+  } catch (error) {
+    console.error("Erro ao deletar venda:", error);
+    res.status(500).json({ error: "Erro interno do servidor." });
+  }
+};
