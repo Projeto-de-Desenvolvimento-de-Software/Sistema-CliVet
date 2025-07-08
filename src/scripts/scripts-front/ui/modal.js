@@ -62,7 +62,7 @@ export function deleteSale(idVenda) {
     fetch(`/venda/${idVenda}`)
         .then(res => res.json())
         .then(sale => {
-            message.textContent = `Tem certeza que deseja excluir a venda do produto ${sale.nomeProduto}?`;
+            message.textContent = `Tem certeza que deseja excluir a venda?`;
             modal.style.display = 'flex';
         })
         .catch(() => {
