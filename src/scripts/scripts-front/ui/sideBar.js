@@ -1,8 +1,8 @@
 import { clearMessages, showMessage } from './messages.js';
-import { displayClients, displayProducts, displayStock } from './pagination.js';
-import { validateFormClient, validateFormProduct, validateFormStock } from './validation.js';
+import { displayClients, displayProducts, displayStock, displaySales } from './pagination.js';
+import { validateFormClient, validateFormProduct, validateFormStock, validateFormSales } from './validation.js';
 
-export async function openSidebar(mode = null, idCliente = null, idProduto = null, idEstoque = null) {
+export async function openSidebar(mode = null, idCliente = null, idProduto = null, idEstoque = null, idVenda = null) {
     const sidebar = document.querySelector('.add_sidebar');
     const form = document.getElementById('addForm');
     const title = sidebar.querySelector('.title_sidebar');
@@ -74,7 +74,7 @@ export async function openSidebar(mode = null, idCliente = null, idProduto = nul
             document.getElementById('inputQuantity').value = stock.quantidade;
 
             if (stock.dataEntrada) {
-            document.getElementById('stockEntryDate').value = stock.dataEntrada.slice(0, 10);
+                document.getElementById('stockEntryDate').value = stock.dataEntrada.slice(0, 10);
             }
             if (stock.validade) {
                 document.getElementById('stockExpiryDate').value = stock.validade.slice(0, 10);
@@ -88,6 +88,42 @@ export async function openSidebar(mode = null, idCliente = null, idProduto = nul
             showMessage('Erro ao carregar dados do estoque.', 'error');
             return;
         }
+    } else if (idVenda) {
+        try {
+            const response = await fetch(`/venda/${idVenda}`);
+            if (!response.ok) throw new Error('Erro ao buscar Venda');
+            const sale = await response.json();
+
+            //document.getElementById('clientSpan').textContent = sale.nome;
+            //document.getElementById('productSpanSale').textContent = sale.nomeProduto;
+            document.getElementById('inputQuantity').value = sale.quantidade;
+            document.getElementById('productPrice').value = sale.precoUnitario;
+            document.getElementById('totalValue').value = sale.valorTotal;
+
+            const clientSpan = document.getElementById('clientSpan');
+            if (clientSpan && sale.nome) {
+                clientSpan.textContent = sale.nome; 
+                clientSpan.setAttribute('data-value', sale.idCliente);
+            }
+
+            const productSpanSale = document.getElementById('productSpanSale');
+            if (productSpanSale && sale.nomeProduto) {
+                productSpanSale.textContent = sale.nomeProduto; 
+                productSpanSale.setAttribute('data-value', sale.idProduto);
+            }
+
+            if (sale.dataVenda) {
+                document.getElementById('saleDate').value = sale.dataVenda.slice(0, 10);
+            }
+
+            form.querySelector('#editIndex').value = sale.idVenda;
+
+            title.textContent = 'Editar Venda';
+            saveButton.textContent = 'Atualizar';
+        } catch (error) {
+            showMessage('Erro ao carregar dados do produto.', 'error');
+            return;
+        }
     } else {
         if (mode === 'addProduct') {
             title.textContent = 'Adicionar Produto';
@@ -99,7 +135,13 @@ export async function openSidebar(mode = null, idCliente = null, idProduto = nul
             title.textContent = 'Adicionar Estoque';
             
         } else {
-            title.textContent = 'Adicionar Venda'
+            title.textContent = 'Adicionar Venda';
+            
+            document.getElementById('clientSpan').textContent = 'Selecione um cliente';
+            document.getElementById('productSpanSale').textContent = 'Selecione um produto';
+
+            document.getElementById('clientSpan').removeAttribute('data-value');
+            document.getElementById('productSpanSale').removeAttribute('data-value');
         }
         saveButton.textContent = 'Salvar';
     }
@@ -328,8 +370,78 @@ export async function saveOrUpdateStock() {
     }
 }
 
+export async function saveOrUpdateSale() {
+    const clientLoaded = document.getElementById('clientSpan').getAttribute('data-value');
+    const productLoaded = document.getElementById('productSpanSale').getAttribute('data-value');
+    const productQuantity = document.getElementById('inputQuantity').value;
+    const unityPrice = document.getElementById('productPrice').value;
+    const saleDate = document.getElementById('saleDate').value;
+    const totalValue = document.getElementById('totalValue').value;
+    const form = document.getElementById('addForm');
+    const editIndexInput = form.querySelector('#editIndex');
+
+    const salesId = editIndexInput.value;
+
+    const numericQuantity = parseInt(productQuantity);
+    const numericUnityPrice = parseCurrency(unityPrice);
+    const numericTotalValue = parseCurrency(totalValue);
+
+    const salesData = {
+        idCliente: clientLoaded,
+        idProduto: productLoaded,
+        quantidadeVendida: numericQuantity,
+        precoUnitario: numericUnityPrice,
+        dataVenda: saleDate,
+        valorTotal: numericTotalValue    
+    };
+
+    console.log(salesData);
+
+    if (!validateFormSales(clientLoaded, productLoaded, numericQuantity, saleDate)) return;
+
+    try {
+
+    let response;
+
+        if (salesId) {
+            response = await fetch(`/venda/editar/${salesId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(salesData)
+            });
+        } else {
+            response = await fetch('/venda', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(salesData)
+        });
+        }
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Erro ao salvar Venda');
+
+         const successMessage = salesId
+            ? 'Venda atualizada com sucesso!'
+            : 'Venda salva com sucesso!';
+        showMessage(successMessage, 'success');
+        
+        form.reset();
+        editIndexInput.value = '';
+
+        await displaySales();
+
+        setTimeout(() => {
+            clearMessages();
+            closeSidebar();
+        }, 500);
+    } catch (error) {
+        showMessage(error.message, 'error');
+    }
+}
+
 window.openSidebar = openSidebar;
 window.closeSidebar = closeSidebar;
 window.saveOrUpdateClient = saveOrUpdateClient;
 window.saveOrUpdateProduct = saveOrUpdateProduct;
 window.saveOrUpdateStock = saveOrUpdateStock; 
+window.saveOrUpdateSale = saveOrUpdateSale;

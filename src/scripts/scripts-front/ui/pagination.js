@@ -3,9 +3,11 @@ import { openSidebar } from './sideBar.js';
 export let currentPage = 1;
 let currentProductPage = 1;
 let currentStockPage = 1;
+let currentSalePage = 1;
 const itemsPerPage = 10;
 const productItemsPerPage = 10;
 const stockItemsPerPage = 10;
+const saleItemsPerPage = 10;
 
 function renderPagination(dataList, totalPages, currentPage, updateFunction) {
     const paginationContainer = document.createElement('div');
@@ -251,4 +253,87 @@ export async function displayStock(estoque = null, page = 1) {
 
     listContainer.appendChild(table);
     listContainer.appendChild(renderPagination(estoque, totalPages, currentStockPage, displayStock));
+}
+
+export async function displaySales(venda = null, page = 1) {
+    const listContainer = document.getElementById('sales_list_container');
+    if (!listContainer) return;
+
+    listContainer.innerHTML = '';
+    currentStockPage = page;
+
+    if (!venda) {
+        try {
+            const response = await fetch('/venda');
+            venda = await response.json();
+
+            if (venda && !Array.isArray(venda)) {
+                venda = venda.data || [];
+            }
+
+        } catch (error) {
+            listContainer.innerHTML = '<p class="no_sales_message">Erro ao carregar a venda.</p>';
+            return;
+        }
+    }
+
+    if (!Array.isArray(venda)) venda = [];
+
+    if (venda.length === 0) {
+        const searchInputSale= document.getElementById('search_sales_input');
+        const isSearching = searchInputSale && searchInputSale.value.trim().length > 0;
+
+        listContainer.innerHTML = isSearching
+            ? '<p class="no_stock_message">Nenhuma venda encontrada.</p>'
+            : '<p class="no_stock_message">Nenhuma venda cadastrada.</p>';
+        return;
+    }
+
+    const totalPages = Math.ceil(venda.length / saleItemsPerPage);
+    const startIndex = (page - 1) * saleItemsPerPage;
+    const endIndex = startIndex + saleItemsPerPage;
+    const vendaPaginada = venda.slice(startIndex, endIndex);
+        
+    const table = document.createElement('table');
+    table.classList.add('pages_table');
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th>Cliente</th>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Preço Unitário</th>
+                <th>Data Venda</th>
+                <th>Valor Total</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    `;
+
+    const tbody = table.querySelector('tbody');
+
+    vendaPaginada.forEach((sale) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${sale.nome}</td>
+            <td>${sale.nomeProduto}</td>
+            <td>${sale.quantidade}</td>
+            <td>R$${sale.precoUnitario}</td>
+            <td>${formatDate(sale.dataVenda)}</td>
+            <td>R$${sale.valorTotal}</td>
+            <td class="actions_cell">
+                <button class="edit_button" onclick="openSidebar(null, null, null, null, '${sale.idVenda}')">
+                    <i class="fa-solid fa-pencil"></i> Editar
+                </button>
+                <button class="delete_button" onclick="deleteSale('${sale.idVenda}')">
+                    <i class="fa-solid fa-trash"></i> Excluir
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    listContainer.appendChild(table);
+    listContainer.appendChild(renderPagination(venda, totalPages, currentSalePage, displaySales));
 }

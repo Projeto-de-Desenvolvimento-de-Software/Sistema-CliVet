@@ -1,4 +1,4 @@
-import { displayClients, displayProducts, displayStock } from './pagination.js';
+import { displayClients, displayProducts, displaySales, displayStock } from './pagination.js';
 import { deleteClient, deleteProduct, confirmDeleteListeners } from './modal.js';
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -59,11 +59,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setupSearch('search_input', 'buscar', displayClients, 'nome');
     setupSearch('search_product_input', 'buscarProduto', displayProducts, 'nomeProduto');
-    setupSearch('search_stock_input', 'buscarEstoque', displayStock, 'pesquisa')
+    setupSearch('search_stock_input', 'buscarEstoque', displayStock, 'pesquisa');
+    setupSearch('search_sales_input', 'buscarVenda', displaySales, 'pesquisa');
 
     displayClients();
     displayProducts();
     displayStock();
+    displaySales();
     confirmDeleteListeners();
 });
 

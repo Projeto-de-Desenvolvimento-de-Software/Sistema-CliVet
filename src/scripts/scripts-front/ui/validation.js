@@ -86,3 +86,29 @@ export function validateFormStock(productCategory, numericQuantity, entryDate, e
 
     return true;
 }
+
+export function validateFormSales(clientLoaded, productLoaded, productQuantity, saleDate) {
+    clearMessages();
+
+    if (clientLoaded == null) {
+        showMessage('O campo Cliente é obrigatório.', 'error');
+        return false;
+    }
+
+    if (productLoaded == null) {
+        showMessage('O campo Produto é obrigatório.', 'error');
+        return false;
+    }
+
+    if (!productQuantity) {
+        showMessage('O campo Quantidade é obrigatório.', 'error');
+        return false;
+    }
+
+    if (!saleDate) {
+        showMessage('O campo Data Venda é obrigatório.', 'error');
+        return false;
+    }
+
+    return true;
+}

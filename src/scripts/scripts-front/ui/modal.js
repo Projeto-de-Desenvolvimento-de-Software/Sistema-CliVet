@@ -1,16 +1,17 @@
-import { displayClients, displayProducts, displayStock } from './pagination.js';
+import { displayClients, displayProducts, displayStock, displaySales } from './pagination.js';
 import { showMessage } from './messages.js';
 
 let clientToDeleteId = null;
 let productToDeleteId = null;
 let stockToDeleteId = null;
+let saleToDeleteId = null;
 
-export function deleteClient(id) {
-    clientToDeleteId = id;
+export function deleteClient(idCliente) {
+    clientToDeleteId = idCliente;
     const modal = document.getElementById('confirmModal');
     const message = document.getElementById('modalMessage');
 
-    fetch(`/cliente/${id}`)
+    fetch(`/cliente/${idCliente}`)
         .then(res => res.json())
         .then(client => {
             message.textContent = `Tem certeza que deseja excluir o cliente ${client.nome}?`;
@@ -53,6 +54,22 @@ export function deleteStock(idEstoque) {
         });
 }
 
+export function deleteSale(idVenda) {
+    saleToDeleteId = idVenda;
+    const modal = document.getElementById('confirmModal');
+    const message = document.getElementById('modalMessage');
+
+    fetch(`/venda/${idVenda}`)
+        .then(res => res.json())
+        .then(sale => {
+            message.textContent = `Tem certeza que deseja excluir a venda do produto ${sale.nomeProduto}?`;
+            modal.style.display = 'flex';
+        })
+        .catch(() => {
+            showMessage('Erro ao buscar venda. Verifique a conexão com o servidor.', 'error');
+        });
+}
+
 export function confirmDeleteListeners() {
     document.getElementById('confirmYes').addEventListener('click', async function () {
         try {
@@ -91,6 +108,18 @@ export function confirmDeleteListeners() {
                 await displayStock();
                 showSuccessModal();
                 stockToDeleteId = null;
+
+            } else if (saleToDeleteId !== null) {
+                const response = await fetch(`/venda/${saleToDeleteId}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Erro ao excluir venda');
+                }
+                await displaySales();
+                showSuccessModal();
+                saleToDeleteId = null;
             }
 
         } catch (error) {
@@ -105,6 +134,7 @@ export function confirmDeleteListeners() {
         clientToDeleteId = null;
         productToDeleteId = null;
         stockToDeleteId = null;
+        saleToDeleteId = null;
         document.getElementById('confirmModal').style.display = 'none';
     });
 }
@@ -120,3 +150,4 @@ function showSuccessModal() {
 window.deleteClient = deleteClient;
 window.deleteProduct = deleteProduct;
 window.deleteStock = deleteStock;
+window.deleteSale = deleteSale;

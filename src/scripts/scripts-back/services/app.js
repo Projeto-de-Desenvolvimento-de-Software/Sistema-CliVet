@@ -20,10 +20,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get('/cliente', renderClients);
 app.post("/cliente", createClient);
-app.get("/cliente/:id", getClientById);
+app.get("/cliente/:idCliente", getClientById);
 app.get("/buscar",  searchClients);
-app.put("/cliente/editar/:id", updateClient);
-app.delete("/cliente/:id", deleteClient);
+app.put("/cliente/editar/:idCliente", updateClient);
+app.delete("/cliente/:idCliente", deleteClient);
 
 app.get('/produto', renderProducts);
 app.post('/produto', createProduct);

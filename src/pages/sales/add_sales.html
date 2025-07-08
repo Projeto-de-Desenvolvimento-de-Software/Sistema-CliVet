@@ -76,7 +76,7 @@
             <p class="add_title">Lista de Vendas</p>
             <div class="search_add_container">
                 <div class="input_wrapper">
-                    <input type="text" placeholder="Pesquisar" id="search_stock_input" class="search">
+                    <input type="text" placeholder="Pesquisar" id="search_sales_input" class="search">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </div>
                 <button class="add_button" onclick="openSidebar('addSales')">
@@ -85,7 +85,7 @@
                 </button>
             </div>
         </div>
-        <div id="stock_list_container"></div>
+        <div id="sales_list_container"></div>
         <div id="pagination_container" class="pagination_container"></div>
 
         <div class="overlay"></div>
@@ -95,23 +95,23 @@
             <form class="form_sidebar" id="addForm">
                 <input type="hidden" id="editIndex"> 
                 <p>Cliente*</p>
-                <div class="dropdown disabled" id="dropdown">
+                <div class="dropdown disabled" id="clientDropdown">
                     <div class="select">
-                        <span class="selected" id="productSpan">Selecione um cliente</span>
+                        <span class="selected" id="clientSpan">Selecione um cliente</span>
                         <div class="caret"></div>
                     </div>
-                    <ul class="menu" id="productMenu">
-                        
+                    <ul class="menu" id="clientMenu">
+                        <li data-value="">Selecione um cliente</li>
                     </ul>
                 </div>
                 <p>Produto*</p>
                 <div class="dropdown disabled" id="dropdown">
                     <div class="select">
-                        <span class="selected" id="productSpan">Selecione um produto</span>
+                        <span class="selected" id="productSpanSale">Selecione um produto</span>
                         <div class="caret"></div>
                     </div>
                     <ul class="menu" id="productMenu">
-                        
+                        <li data-value="">Selecione um produto</li>
                     </ul>
                 </div>
                 <p>Quantidade*</p>
@@ -123,10 +123,10 @@
                 <p>Preço Unitário</p>
                 <input type="text" class="input_sidebar" id="productPrice" placeholder="R$ 0,00" readonly>
                 <p>Data Venda*</p>
-                <input type="date" class="input_data" id="stockEntryDate">
+                <input type="date" class="input_data" id="saleDate">
                 <p>Valor Total</p>
-                <input type="text" class="input_sidebar" id="productPrice" placeholder="R$ 0,00" readonly>
-                <button type="button" class="add_button" onclick="saveOrUpdateStock()">Salvar</button>
+                <input type="text" class="input_sidebar" id="totalValue" placeholder="R$ 0,00" readonly>
+                <button type="button" class="add_button" onclick="saveOrUpdateSale()">Salvar</button>
             </form>
         </aside>  
 
@@ -148,6 +148,8 @@
     <script type="module" src="../../scripts/scripts-front/ui/main.js"></script>
     <script src="../../scripts/scripts-front/ui/selector.js"></script>
     <script src="../../scripts/scripts-front/ui/quantityInput.js"></script>
-    <script src="../../scripts/scripts-front/ui/loadProducts.js"></script>
+    <script src="../../scripts/scripts-front/ui/loadProductsByCategory.js"></script>
+    <script src="../../scripts/scripts-front/ui/loadElements.js"></script>
+    <script src="../../scripts/scripts-front/ui/updateTotalValue.js"></script>
 </body>
 </html> 

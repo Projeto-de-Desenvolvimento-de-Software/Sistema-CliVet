@@ -16,5 +16,7 @@ function stepper(action) {
     } else if (action === 'decrement' && val > min) {
         input.value = val - 1;
     }
+
+    updateTotalValue();
 }
 
