@@ -14,7 +14,7 @@ export async function openSidebar(mode = null, idCliente = null, idProduto = nul
 
     if (idCliente) {
         try {
-        const response = await fetch(`/cliente/${idCliente}`);
+            const response = await fetch(`/cliente/${idCliente}`);
             if (!response.ok) throw new Error('Erro ao buscar cliente');
             const client = await response.json();
 
@@ -32,13 +32,13 @@ export async function openSidebar(mode = null, idCliente = null, idProduto = nul
         }
     } else if (idProduto) {
         try {
-           const response = await fetch(`/produto/${idProduto}`);
+            const response = await fetch(`/produto/${idProduto}`);
             if (!response.ok) throw new Error('Erro ao buscar Produto');
             const product = await response.json();
 
             document.getElementById('productName').value = product.nomeProduto;
             document.getElementById('productDescription').value = product.descricaoProduto || '';
-            document.getElementById('productCategory').textContent =  product.categoriaProduto;
+            document.getElementById('productCategory').textContent = product.categoriaProduto;
             document.getElementById('productPrice').value = product.precoProduto?.toString().replace('.', ',') || '';
             form.querySelector('#editIndex').value = product.idProduto;
 
@@ -48,6 +48,7 @@ export async function openSidebar(mode = null, idCliente = null, idProduto = nul
             showMessage('Erro ao carregar dados do produto.', 'error');
             return;
         }
+
     } else if (idEstoque) {
         try {
             const response = await fetch(`/estoque/${idEstoque}`);
@@ -55,39 +56,32 @@ export async function openSidebar(mode = null, idCliente = null, idProduto = nul
             const stock = await response.json();
 
             if (stock.categoriaProduto) {
-                const categoryValueFromDB = stock.categoriaProduto; 
+                const categoryValueFromDB = stock.categoriaProduto;
                 const menuItem = document.querySelector(`.menu li[data-value="${categoryValueFromDB}"]`);
-
-                if (menuItem) {
-                    document.getElementById('productCategory').textContent = menuItem.textContent;
-                } else {
-                    document.getElementById('productCategory').textContent = categoryValueFromDB;
-                }
+                document.getElementById('productCategory').textContent = menuItem?.textContent || categoryValueFromDB;
             }
-        
+
             const productSpan = document.getElementById('productSpan');
             if (productSpan && stock.nomeProduto) {
-                productSpan.textContent = stock.nomeProduto; 
+                productSpan.textContent = stock.nomeProduto;
                 productSpan.setAttribute('data-value', stock.idProduto);
             }
 
             document.getElementById('inputQuantity').value = stock.quantidade;
 
-            if (stock.dataEntrada) {
-                document.getElementById('stockEntryDate').value = stock.dataEntrada.slice(0, 10);
-            }
-            if (stock.validade) {
-                document.getElementById('stockExpiryDate').value = stock.validade.slice(0, 10);
-            }
-        
+            if (stock.dataEntrada) document.getElementById('stockEntryDate').value = stock.dataEntrada.slice(0, 10);
+            if (stock.validade) document.getElementById('stockExpiryDate').value = stock.validade.slice(0, 10);
+
             form.querySelector('#editIndex').value = stock.idEstoque;
 
             title.textContent = 'Editar Estoque';
             saveButton.textContent = 'Atualizar';
+
         } catch (error) {
             showMessage('Erro ao carregar dados do estoque.', 'error');
             return;
         }
+
     } else if (idVenda) {
         try {
             const response = await fetch(`/venda/${idVenda}`);
@@ -100,14 +94,71 @@ export async function openSidebar(mode = null, idCliente = null, idProduto = nul
 
             const clientSpan = document.getElementById('clientSpan');
             if (clientSpan && sale.nome) {
-                clientSpan.textContent = sale.nome; 
+                clientSpan.textContent = sale.nome;
                 clientSpan.setAttribute('data-value', sale.idCliente);
             }
 
             const productSpanSale = document.getElementById('productSpanSale');
-            if (productSpanSale && sale.nomeProduto) {
-                productSpanSale.textContent = sale.nomeProduto; 
-                productSpanSale.setAttribute('data-value', sale.idProduto);
+            const quantityInput = document.getElementById('inputQuantity');
+            const productDropdown = document.getElementById('dropdown');
+            const decrementButton = document.getElementById('decrement');
+            const incrementButton = document.getElementById('increment');
+
+            if (productSpanSale) {
+                productSpanSale.setAttribute('data-value', sale.idProduto || '');
+                productSpanSale.textContent = sale.nomeProduto || 'Produto removido';
+
+                const isProdutoRemovido = !sale.nomeProduto;
+
+                if (isProdutoRemovido) {
+                    if (productDropdown) {
+                        productDropdown.classList.add('disabled');
+                        productDropdown.style.pointerEvents = 'none';
+                        productDropdown.style.opacity = 0.6;
+                        productDropdown.style.cursor = 'not-allowed';
+                        productDropdown.title = 'Este produto foi removido e não pode ser alterado.';
+                    }
+
+                    quantityInput.disabled = true;
+                    quantityInput.style.opacity = 0.6;
+                    quantityInput.style.cursor = 'not-allowed';
+                    quantityInput.title = 'Não é possível editar a quantidade de um produto removido.';
+
+                    if (decrementButton) {
+                        decrementButton.disabled = true;
+                        decrementButton.style.opacity = 0.6;
+                        decrementButton.style.cursor = 'not-allowed';
+                    }
+                    if (incrementButton) {
+                        incrementButton.disabled = true;
+                        incrementButton.style.opacity = 0.6;
+                        incrementButton.style.cursor = 'not-allowed';
+                    }
+                } else {
+                    if (productDropdown) {
+                        productDropdown.classList.remove('disabled');
+                        productDropdown.style.pointerEvents = 'auto';
+                        productDropdown.style.opacity = 1;
+                        productDropdown.style.cursor = 'pointer';
+                        productDropdown.removeAttribute('title');
+                    }
+
+                    quantityInput.disabled = false;
+                    quantityInput.style.opacity = 1;
+                    quantityInput.style.cursor = 'text';
+                    quantityInput.removeAttribute('title');
+
+                    if (decrementButton) {
+                        decrementButton.disabled = false;
+                        decrementButton.style.opacity = 1;
+                        decrementButton.style.cursor = 'pointer';
+                    }
+                    if (incrementButton) {
+                        incrementButton.disabled = false;
+                        incrementButton.style.opacity = 1;
+                        incrementButton.style.cursor = 'pointer';
+                    }
+                }
             }
 
             if (sale.dataVenda) {
@@ -118,29 +169,32 @@ export async function openSidebar(mode = null, idCliente = null, idProduto = nul
 
             title.textContent = 'Editar Venda';
             saveButton.textContent = 'Atualizar';
+
         } catch (error) {
             showMessage('Erro ao carregar dados do produto.', 'error');
             return;
         }
+
     } else {
         if (mode === 'addProduct') {
             title.textContent = 'Adicionar Produto';
-
-        } else if (mode === 'addClient'){
+        } else if (mode === 'addClient') {
             title.textContent = 'Adicionar Cliente';
-
-        } else if (mode === 'addStock'){
+        } else if (mode === 'addStock') {
             title.textContent = 'Adicionar Estoque';
-            
         } else {
             title.textContent = 'Adicionar Venda';
-            
-            document.getElementById('clientSpan').textContent = 'Selecione um cliente';
-            document.getElementById('productSpanSale').textContent = 'Selecione um produto';
 
-            document.getElementById('clientSpan').removeAttribute('data-value');
-            document.getElementById('productSpanSale').removeAttribute('data-value');
+            const clientSpan = document.getElementById('clientSpan');
+            const productSpanSale = document.getElementById('productSpanSale');
+
+            clientSpan.textContent = 'Selecione um cliente';
+            productSpanSale.textContent = 'Selecione um produto';
+
+            clientSpan.removeAttribute('data-value');
+            productSpanSale.removeAttribute('data-value');
         }
+
         saveButton.textContent = 'Salvar';
     }
 
@@ -282,11 +336,13 @@ export async function saveOrUpdateProduct() {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Erro ao salvar Produto');
 
+         if (data.message !== "Nenhuma alteração foi feita.") {
          const successMessage = productId
             ? 'Produto atualizado com sucesso!'
             : 'Produto salvo com sucesso!';
         showMessage(successMessage, 'success');
-        
+        }
+
         form.reset();
         editIndexInput.value = '';
 
@@ -349,11 +405,13 @@ export async function saveOrUpdateStock() {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Erro ao salvar Estoque');
 
+         if (data.message !== "Nenhuma alteração foi feita.") {
          const successMessage = stockId
             ? 'Estoque atualizado com sucesso!'
             : 'Estoque salvo com sucesso!';
         showMessage(successMessage, 'success');
-        
+        }
+
         form.reset();
         editIndexInput.value = '';
 
@@ -418,11 +476,13 @@ export async function saveOrUpdateSale() {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Erro ao salvar Venda');
 
+         if (data.message !== "Nenhuma alteração foi feita.") {
          const successMessage = salesId
             ? 'Venda atualizada com sucesso!'
             : 'Venda salva com sucesso!';
         showMessage(successMessage, 'success');
-        
+        }
+
         form.reset();
         editIndexInput.value = '';
 
