@@ -20,7 +20,7 @@ CREATE TABLE Produto (
 CREATE TABLE Estoque (
     idEstoque INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     quantidade INT NOT NULL,
-    validade DATE NOT NULL,
+    validade DATE,
     dataEntrada DATE NOT NULL,
     fk_Produto_idProduto INT UNSIGNED NOT NULL
 );
@@ -39,7 +39,7 @@ CREATE TABLE Itens_Venda (
     quantidade INT NOT NULL,
     idItem INT UNSIGNED AUTO_INCREMENT PRIMARY KEY
 );
- 
+
 ALTER TABLE Estoque ADD CONSTRAINT fk_Estoque_Produto
     FOREIGN KEY (fk_Produto_idProduto)
     REFERENCES Produto (idProduto)
