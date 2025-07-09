@@ -149,7 +149,7 @@ export async function displayProducts(produto = null, page = 1) {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${product.nomeProduto}</td>
-            <td>${product.descricaoProduto}</td>
+            <td>${product.descricaoProduto?.trim() || '-'}</td>
             <td>${product.categoriaProduto}</td>
             <td>R$ ${Number(product.precoProduto).toFixed(2)}</td>
             <td class="actions_cell">
