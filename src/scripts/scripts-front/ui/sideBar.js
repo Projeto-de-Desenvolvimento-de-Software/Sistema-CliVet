@@ -39,7 +39,11 @@ export async function openSidebar(mode = null, idCliente = null, idProduto = nul
             document.getElementById('productName').value = product.nomeProduto;
             document.getElementById('productDescription').value = product.descricaoProduto || '';
             document.getElementById('productCategory').textContent = product.categoriaProduto;
-            document.getElementById('productPrice').value = product.precoProduto?.toString().replace('.', ',') || '';
+            document.getElementById('productPrice').value = new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(product.precoProduto || 0);
+
             form.querySelector('#editIndex').value = product.idProduto;
 
             title.textContent = 'Editar Produto';
@@ -89,8 +93,16 @@ export async function openSidebar(mode = null, idCliente = null, idProduto = nul
             const sale = await response.json();
 
             document.getElementById('inputQuantity').value = sale.quantidade;
-            document.getElementById('productPrice').value = sale.precoUnitario;
-            document.getElementById('totalValue').value = sale.valorTotal;
+            document.getElementById('productPrice').value = new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(sale.precoUnitario || 0);
+
+            document.getElementById('totalValue').value = new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(sale.valorTotal || 0);
+
 
             const clientSpan = document.getElementById('clientSpan');
             if (clientSpan && sale.nome) {

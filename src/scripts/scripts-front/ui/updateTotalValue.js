@@ -6,7 +6,7 @@ const totalValueInput = document.getElementById('totalValue');
 
 function parseCurrency(value) {
     if (!value) return 0;
-    return parseFloat(value.replace("R$", "").trim().replace(",", "."));
+    return parseFloat(value.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
 }
 
 function updateTotalValue() {
