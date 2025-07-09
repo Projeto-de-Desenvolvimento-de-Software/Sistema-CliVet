@@ -398,7 +398,8 @@ export async function saveOrUpdateStock() {
     delete stockData.validade;
     }
 
-    if (!validateFormStock(productCategory, numericQuantity, entryDate, expireDate)) return;
+   const isEditing = !!stockId;
+    if (!validateFormStock(productCategory, numericQuantity, entryDate, expireDate, isEditing)) return;
 
     try {
 

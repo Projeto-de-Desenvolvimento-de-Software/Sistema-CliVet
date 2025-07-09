@@ -56,15 +56,20 @@ export function validateFormProduct(productName, productCategory, productPrice) 
     return true;
 }
 
-export function validateFormStock(productCategory, numericQuantity, entryDate, expireDate) {
+export function validateFormStock(productCategory, numericQuantity, entryDate, expireDate, isEditing = false) {
     clearMessages();
-    
+
     if (productCategory == 'Selecione uma categoria') {
         showMessage('O campo Categoria é obrigatório.', 'error');
         return false;
     }
 
-    if (!numericQuantity) {
+    if (
+        numericQuantity === null ||
+        isNaN(numericQuantity) ||
+        numericQuantity < 0 ||
+        (!isEditing && numericQuantity === 0)
+    ) {
         showMessage('O campo Quantidade é obrigatório.', 'error');
         return false;
     }
