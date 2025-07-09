@@ -44,11 +44,13 @@ ALTER TABLE Estoque ADD CONSTRAINT fk_Estoque_Produto
     FOREIGN KEY (fk_Produto_idProduto)
     REFERENCES Produto (idProduto)
     ON DELETE RESTRICT;
- 
+
+ALTER TABLE Venda MODIFY fk_Cliente_idCliente INT UNSIGNED NULL;
+
 ALTER TABLE Venda ADD CONSTRAINT fk_Venda_Cliente
     FOREIGN KEY (fk_Cliente_idCliente)
     REFERENCES Cliente (idCliente)
-    ON DELETE RESTRICT;
+    ON DELETE SET NULL;
  
 ALTER TABLE Itens_Venda ADD CONSTRAINT fk_Itens_Venda_Venda
     FOREIGN KEY (fk_Venda_idVenda)
@@ -57,8 +59,7 @@ ALTER TABLE Itens_Venda ADD CONSTRAINT fk_Itens_Venda_Venda
 
 ALTER TABLE Itens_Venda MODIFY fk_Produto_idProduto INT UNSIGNED NULL;
 
-ALTER TABLE Itens_Venda
-     ADD CONSTRAINT fk_Itens_Venda_Produto
+ALTER TABLE Itens_Venda ADD CONSTRAINT fk_Itens_Venda_Produto
      FOREIGN KEY (fk_Produto_idProduto)
      REFERENCES Produto (idProduto)
      ON DELETE SET NULL;
