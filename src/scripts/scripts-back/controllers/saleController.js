@@ -129,7 +129,7 @@ export const searchSale = async (req, res) => {
 
   try {
     const [sales] = await pool.query(`
-       SELECT 
+      SELECT 
         v.idVenda, v.dataVenda, v.valorTotal,
         c.idCliente, COALESCE(c.nome, 'Cliente Removido') AS nome, c.email,
         p.idProduto, IFNULL(p.nomeProduto, 'Produto removido') AS nomeProduto,
@@ -138,10 +138,10 @@ export const searchSale = async (req, res) => {
       LEFT JOIN Cliente c ON v.fk_Cliente_idCliente = c.idCliente
       JOIN Itens_Venda iv ON iv.fk_Venda_idVenda = v.idVenda
       LEFT JOIN Produto p ON iv.fk_Produto_idProduto = p.idProduto
-      WHERE c.nome LIKE ? OR 
-        IFNULL(p.nomeProduto, 'Produto removido') LIKE ? OR 
-        DATE(v.dataVenda) LIKE ?`, 
-        [`%${pesquisa}%`, `%${pesquisa}%`, `%${pesquisa}%`]);
+      WHERE COALESCE(c.nome, 'Cliente Removido') LIKE ?
+        OR IFNULL(p.nomeProduto, 'Produto removido') LIKE ?
+        OR DATE(v.dataVenda) LIKE ?`,
+      [`%${pesquisa}%`, `%${pesquisa}%`, `%${pesquisa}%`]);
 
     res.json(sales);
   } catch (error) {
@@ -149,6 +149,7 @@ export const searchSale = async (req, res) => {
     res.status(500).json({ error: "Erro ao pesquisar vendas." });
   }
 };
+
 
 export const updateSale = async (req, res) => {
   const { idVenda } = req.params;
