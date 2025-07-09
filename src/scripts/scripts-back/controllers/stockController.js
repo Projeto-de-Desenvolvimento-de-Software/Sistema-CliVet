@@ -56,7 +56,7 @@ export const renderStock = async (req, res) => {
     const [stock] = await pool.query(`
       SELECT 
         e.idEstoque,
-        p.nomeProduto, p.descricaoProduto,
+        p.nomeProduto, p.categoriaProduto,
         e.quantidade, e.dataEntrada, e.validade
       FROM Estoque e
       JOIN Produto p ON e.fk_Produto_idProduto = p.idProduto

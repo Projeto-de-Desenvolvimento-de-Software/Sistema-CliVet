@@ -219,7 +219,7 @@ export async function displayStock(estoque = null, page = 1) {
         <thead>
             <tr>
                 <th>Produto</th>
-                <th>Descrição</th>
+                <th>Categoria</th>
                 <th>Quantidade</th>
                 <th>Data Entrada</th>
                 <th>Validade</th>
@@ -235,7 +235,7 @@ export async function displayStock(estoque = null, page = 1) {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${stock.nomeProduto}</td>
-            <td>${stock.descricaoProduto}</td>
+            <td>${stock.categoriaProduto}</td>
             <td>${stock.quantidade}</td>
             <td>${formatDate(stock.dataEntrada)}</td>
             <td>${stock.validade ? formatDate(stock.validade) : ' - '}</td>
