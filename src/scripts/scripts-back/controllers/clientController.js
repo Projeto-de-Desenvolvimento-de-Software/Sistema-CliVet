@@ -79,12 +79,17 @@ export const updateClient = async (req, res) => {
 };
 
 export const deleteClient = async (req, res) => {
-    const { idCliente } = req.params;
+  const { idCliente } = req.params;
+
+  try {
     const [result] = await pool.query("DELETE FROM Cliente WHERE idCliente = ?", [idCliente]);
-  
     if (result.affectedRows === 1) {
-      res.json({ message: "Cliente deletado!" });
+      res.json({ message: "Cliente deletado com sucesso." });
     } else {
       res.status(404).json({ error: "Cliente não encontrado." });
     }
-  };
+  } catch (error) {
+    console.error("Erro ao deletar cliente:", error);
+    res.status(500).json({ error: "Erro interno do servidor." });
+  }
+};

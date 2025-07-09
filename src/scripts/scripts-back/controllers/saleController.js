@@ -76,15 +76,15 @@ export const getSaleById = async (req, res) => {
     try {
         const [rows] = await pool.query(`
             SELECT 
-                v.idVenda, v.dataVenda, v.valorTotal,
-                c.idCliente, c.nome, c.email,
-                p.idProduto, p.nomeProduto, p.categoriaProduto, 
-                iv.precoUnitario, iv.quantidade
-            FROM Venda v
-            JOIN Cliente c ON v.fk_Cliente_idCliente = c.idCliente
-            JOIN Itens_Venda iv ON iv.fk_Venda_idVenda = v.idVenda
-            LEFT JOIN Produto p ON iv.fk_Produto_idProduto = p.idProduto
-            WHERE v.idVenda = ?
+            v.idVenda, v.dataVenda, v.valorTotal,
+            c.idCliente, COALESCE(c.nome, 'Cliente Removido') AS nome, c.email,
+            p.idProduto, p.nomeProduto, p.categoriaProduto, 
+            iv.precoUnitario, iv.quantidade
+          FROM Venda v
+          LEFT JOIN Cliente c ON v.fk_Cliente_idCliente = c.idCliente
+          JOIN Itens_Venda iv ON iv.fk_Venda_idVenda = v.idVenda
+          LEFT JOIN Produto p ON iv.fk_Produto_idProduto = p.idProduto
+          WHERE v.idVenda = ?
         `, [idVenda]);
 
         if (rows.length === 0) {
@@ -102,15 +102,15 @@ export const renderSale = async (req, res) => {
   try {
     const [sales] = await pool.query(`
      SELECT 
-      v.idVenda, v.dataVenda, v.valorTotal,
-      c.idCliente, c.nome, c.email,
-      COALESCE(p.idProduto, NULL) AS idProduto,
-      COALESCE(p.nomeProduto, 'Produto removido') AS nomeProduto,
-      iv.precoUnitario, iv.quantidade
-    FROM Venda v
-    JOIN Cliente c ON v.fk_Cliente_idCliente = c.idCliente
-    JOIN Itens_Venda iv ON iv.fk_Venda_idVenda = v.idVenda
-    LEFT JOIN Produto p ON iv.fk_Produto_idProduto = p.idProduto
+        v.idVenda, v.dataVenda, v.valorTotal,
+        c.idCliente, COALESCE(c.nome, 'Cliente Removido') AS nome, c.email,
+        COALESCE(p.idProduto, NULL) AS idProduto,
+        COALESCE(p.nomeProduto, 'Produto removido') AS nomeProduto,
+        iv.precoUnitario, iv.quantidade
+      FROM Venda v
+      LEFT JOIN Cliente c ON v.fk_Cliente_idCliente = c.idCliente
+      JOIN Itens_Venda iv ON iv.fk_Venda_idVenda = v.idVenda
+      LEFT JOIN Produto p ON iv.fk_Produto_idProduto = p.idProduto
     `);
 
     if (sales.length === 0) {
@@ -129,13 +129,13 @@ export const searchSale = async (req, res) => {
 
   try {
     const [sales] = await pool.query(`
-      SELECT 
+       SELECT 
         v.idVenda, v.dataVenda, v.valorTotal,
-        c.idCliente, c.nome, c.email,
-        p.idProduto,   IFNULL(p.nomeProduto, 'Produto removido') AS nomeProduto,
+        c.idCliente, COALESCE(c.nome, 'Cliente Removido') AS nome, c.email,
+        p.idProduto, IFNULL(p.nomeProduto, 'Produto removido') AS nomeProduto,
         iv.precoUnitario, iv.quantidade
       FROM Venda v
-      JOIN Cliente c ON v.fk_Cliente_idCliente = c.idCliente
+      LEFT JOIN Cliente c ON v.fk_Cliente_idCliente = c.idCliente
       JOIN Itens_Venda iv ON iv.fk_Venda_idVenda = v.idVenda
       LEFT JOIN Produto p ON iv.fk_Produto_idProduto = p.idProduto
       WHERE c.nome LIKE ? OR 
@@ -152,7 +152,7 @@ export const searchSale = async (req, res) => {
 
 export const updateSale = async (req, res) => {
   const { idVenda } = req.params;
-  const { idProduto, quantidadeVendida, idCliente, dataVenda } = req.body;
+  let { idProduto, quantidadeVendida, idCliente, dataVenda } = req.body;
 
   try {
     const [saleItems] = await pool.query(
@@ -170,14 +170,22 @@ export const updateSale = async (req, res) => {
     const oldPrice = saleItems[0].precoUnitario;
     const oldDate = saleItems[0].dataVenda.toISOString().slice(0, 10);
     const oldClientId = saleItems[0].idCliente;
+    const idClienteNum = idCliente === null || idCliente === "null" ? null : Number(idCliente);
+    const oldClientIdNum = oldClientId === null ? null : Number(oldClientId);
 
     if (
       Number(oldProductId) === Number(idProduto) &&
       Number(oldQuantity) === Number(quantidadeVendida) &&
-      oldClientId === Number(idCliente) &&
+      ((oldClientIdNum === null && idClienteNum === null) || oldClientIdNum === idClienteNum) &&
       oldDate === dataVenda
     ) {
       return res.status(200).json({ message: "Nenhuma alteração foi feita." });
+    }
+
+    if (idCliente === null || idCliente === "null" || idCliente === undefined) {
+      idCliente = null;
+    } else {
+      idCliente = Number(idCliente);
     }
 
     const productChanged = Number(oldProductId) !== Number(idProduto);
@@ -305,6 +313,7 @@ export const updateSale = async (req, res) => {
     return res.status(500).json({ error: "Erro ao atualizar venda." });
   }
 };
+
 
 export const deleteSale = async (req, res) => {
   const { idVenda } = req.params;
