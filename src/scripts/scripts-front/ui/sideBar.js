@@ -382,6 +382,10 @@ export async function saveOrUpdateStock() {
         validade: expireDate    
     };
 
+    if (!expireDate) {
+    delete stockData.validade;
+    }
+
     if (!validateFormStock(productCategory, numericQuantity, entryDate, expireDate)) return;
 
     try {

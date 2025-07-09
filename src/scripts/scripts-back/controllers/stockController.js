@@ -20,8 +20,9 @@ export const createStock = async (req, res) => {
   }
   await pool.query(
     "INSERT INTO Estoque (quantidade, dataEntrada, validade, fk_Produto_idProduto) VALUES (?, ?, ?, ?)",
-    [quantidade, dataEntrada, validade, idProduto]
+    [quantidade, dataEntrada, validade || null, idProduto]
   );
+
 
   return res.status(201).json({ message: "Produto adicionado ao estoque com sucesso!" });
 };
@@ -32,13 +33,8 @@ export const getStockById = async (req, res) => {
     try {
           const [rows] = await pool.query(`
             SELECT 
-              e.idEstoque,
-              e.quantidade,
-              e.dataEntrada,
-              e.validade,
-              p.idProduto,
-              p.nomeProduto,
-              p.categoriaProduto
+              e.idEstoque, e.quantidade, e.dataEntrada, e.validade,
+              p.idProduto, p.nomeProduto, p.categoriaProduto
             FROM Estoque e
             JOIN Produto p ON e.fk_Produto_idProduto = p.idProduto
             WHERE e.idEstoque = ?
@@ -57,29 +53,31 @@ export const getStockById = async (req, res) => {
 
 export const renderStock = async (req, res) => {
   try {
-    const [estoque] = await pool.query(`
+    const [stock] = await pool.query(`
       SELECT 
         e.idEstoque,
-        p.nomeProduto,
-        p.descricaoProduto,
-        e.quantidade,
-        e.dataEntrada,
-        e.validade
+        p.nomeProduto, p.descricaoProduto,
+        e.quantidade, e.dataEntrada, e.validade
       FROM Estoque e
       JOIN Produto p ON e.fk_Produto_idProduto = p.idProduto
     `);
 
-    if (estoque.length === 0) {
+    if (stock.length === 0) {
       return res.status(404).json({ message: "Nenhum produto cadastrado no estoque." });
     }
 
-    return res.status(200).json(estoque);
+    const formattedStock = stock.map(item => ({
+      ...item,
+      dataEntrada: item.dataEntrada.toISOString().slice(0, 10),
+      validade: item.validade ? item.validade.toISOString().slice(0, 10) : null
+    }));
+
+    return res.status(200).json(formattedStock);
   } catch (error) {
     console.error("Erro ao buscar o estoque:", error);
     return res.status(500).json({ error: "Erro ao buscar o estoque." });
   }
 };
-
 
 export const searchStock = async (req, res) => {
   const { pesquisa = "" } = req.query;
@@ -87,13 +85,8 @@ export const searchStock = async (req, res) => {
   try {
     const [estoque] = await pool.query(`
       SELECT 
-        p.nomeProduto,
-        p.descricaoProduto,
-        p.categoriaProduto,
-        e.quantidade,
-        e.dataEntrada,
-        e.validade,
-        e.idEstoque
+        p.nomeProduto, p.descricaoProduto, p.categoriaProduto,
+        e.quantidade, e.dataEntrada, e.validade, e.idEstoque
       FROM Estoque e
       JOIN Produto p ON e.fk_Produto_idProduto = p.idProduto
       WHERE p.nomeProduto LIKE ? OR p.categoriaProduto LIKE ?
@@ -117,17 +110,22 @@ export const updateStock = async (req, res) => {
             return res.status(404).json({ error: "Estoque não encontrado." });
         }
 
+        const current = currentStock[0];
+
+        const currentValidade = current.validade ? current.validade.toISOString().slice(0, 10) : null;
+        const newValidade = validade || null;
+
         if (
-            currentStock[0].quantidade == quantidade &&
-            currentStock[0].dataEntrada.toISOString().slice(0, 10) === dataEntrada &&
-            currentStock[0].validade.toISOString().slice(0, 10) === validade
+            current.quantidade == quantidade &&
+            current.dataEntrada.toISOString().slice(0, 10) === dataEntrada &&
+            currentValidade === newValidade
         ) {
             return res.status(200).json({ message: "Nenhuma alteração foi feita." });
         }
 
         await pool.query(
             "UPDATE Estoque SET quantidade = ?, dataEntrada = ?, validade = ? WHERE idEstoque = ?",
-            [quantidade, dataEntrada, validade, idEstoque]
+            [quantidade, dataEntrada, newValidade, idEstoque]
         );
 
         return res.status(200).json({ message: "Estoque atualizado com sucesso!" });

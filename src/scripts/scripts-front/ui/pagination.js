@@ -238,7 +238,7 @@ export async function displayStock(estoque = null, page = 1) {
             <td>${stock.descricaoProduto}</td>
             <td>${stock.quantidade}</td>
             <td>${formatDate(stock.dataEntrada)}</td>
-            <td>${formatDate(stock.validade)}</td>
+            <td>${stock.validade ? formatDate(stock.validade) : ' - '}</td>
             <td class="actions_cell">
                 <button class="edit_button" onclick="openSidebar(null, null, null,'${stock.idEstoque}')">
                     <i class="fa-solid fa-pencil"></i> Editar

@@ -74,12 +74,7 @@ export function validateFormStock(productCategory, numericQuantity, entryDate, e
         return false;
     }
 
-    if (!expireDate) {
-        showMessage('O campo Validade é obrigatório.', 'error');
-        return false;
-    }
-
-    if (expireDate <= entryDate) {
+    if (expireDate && expireDate <= entryDate) {
         showMessage('A data de validade deve ser posterior à data de entrada.', 'error');
         return false;
     }
