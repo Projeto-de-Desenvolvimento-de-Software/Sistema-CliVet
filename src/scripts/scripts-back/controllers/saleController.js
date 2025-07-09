@@ -40,20 +40,24 @@ export const createSale = async (req, res) => {
 
     const idVenda = vendaResult.insertId;
 
-    await pool.query(`
-      INSERT INTO Itens_Venda (fk_Venda_idVenda, fk_Produto_idProduto, precoUnitario, quantidade)
-      VALUES (?, ?, ?, ?)
-      `,
+    await pool.query(
+      "INSERT INTO Itens_Venda (fk_Venda_idVenda, fk_Produto_idProduto, precoUnitario, quantidade) VALUES (?, ?, ?, ?)",
       [idVenda, idProduto, precoUnitario, quantidadeVendida]
     );
 
-
     const newQuant = stockQuant - quantidadeVendida;
 
-    await pool.query(
-      "UPDATE Estoque SET quantidade = ? WHERE fk_Produto_idProduto = ?",
-      [newQuant, idProduto]
-    );
+    if (newQuant > 0) {
+      await pool.query(
+        "UPDATE Estoque SET quantidade = ? WHERE fk_Produto_idProduto = ?",
+        [newQuant, idProduto]
+      );
+    } else {
+      await pool.query(
+        "DELETE FROM Estoque WHERE fk_Produto_idProduto = ?",
+        [idProduto]
+      );
+    }
 
     return res.status(201).json({
       message: "Venda realizada com sucesso.",
@@ -191,10 +195,17 @@ export const updateSale = async (req, res) => {
     if (productChanged && oldProductInStock) {
       const updatedOldStockQty = oldStockRows[0].quantidade + oldQuantity;
 
-      await pool.query(
-        "UPDATE Estoque SET quantidade = ? WHERE fk_Produto_idProduto = ?",
-        [updatedOldStockQty, oldProductId]
-      );
+      if (updatedOldStockQty > 0) {
+        await pool.query(
+          "UPDATE Estoque SET quantidade = ? WHERE fk_Produto_idProduto = ?",
+          [updatedOldStockQty, oldProductId]
+        );
+      } else {
+        await pool.query(
+          "DELETE FROM Estoque WHERE fk_Produto_idProduto = ?",
+          [oldProductId]
+        );
+      }
     }
 
     if (productChanged) {
@@ -224,10 +235,17 @@ export const updateSale = async (req, res) => {
 
       const updatedNewStockQty = newStockRows[0].quantidade - quantidadeVendida;
 
-      await pool.query(
-        "UPDATE Estoque SET quantidade = ? WHERE fk_Produto_idProduto = ?",
-        [updatedNewStockQty, idProduto]
-      );
+      if (updatedNewStockQty > 0) {
+        await pool.query(
+          "UPDATE Estoque SET quantidade = ? WHERE fk_Produto_idProduto = ?",
+          [updatedNewStockQty, idProduto]
+        );
+      } else {
+        await pool.query(
+          "DELETE FROM Estoque WHERE fk_Produto_idProduto = ?",
+          [idProduto]
+        );
+      }
 
       const totalValue = newUnitPrice * quantidadeVendida;
 
@@ -254,10 +272,17 @@ export const updateSale = async (req, res) => {
           return res.status(400).json({ error: "Estoque insuficiente para a quantidade desejada." });
         }
 
-        await pool.query(
-          "UPDATE Estoque SET quantidade = ? WHERE fk_Produto_idProduto = ?",
-          [updatedStockQty, oldProductId]
-        );
+        if (updatedStockQty > 0) {
+          await pool.query(
+            "UPDATE Estoque SET quantidade = ? WHERE fk_Produto_idProduto = ?",
+            [updatedStockQty, oldProductId]
+          );
+        } else {
+          await pool.query(
+            "DELETE FROM Estoque WHERE fk_Produto_idProduto = ?",
+            [oldProductId]
+          );
+        }
       }
 
       const totalValue = oldPrice * quantidadeVendida;

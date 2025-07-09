@@ -78,17 +78,23 @@ export const updateProduct = async (req, res) => {
     const [currentProduct] = await pool.query("SELECT * FROM Produto WHERE idProduto = ?", [idProduto]);
     if (currentProduct.length === 0) {
         return res.status(404).json({ error: "Produto não encontrado." });
-    } else if (
+    }
+
+    const precoProdutoNum = Number(precoProduto);
+
+    if (
         currentProduct[0].nomeProduto === nomeProduto &&
         currentProduct[0].descricaoProduto === descricaoProduto &&
         currentProduct[0].categoriaProduto === categoriaProduto &&
-        currentProduct[0].precoProduto === precoProduto
+        Number(currentProduct[0].precoProduto) === precoProdutoNum
     ) {
         return res.status(200).json({ message: "Nenhuma alteração foi feita." });
     }
 
-    const [rows] = await pool.query("SELECT * FROM Produto WHERE nomeProduto = ? AND categoriaProduto = ? AND idProduto != ?",
-    [nomeProduto, categoriaProduto, idProduto]);
+    const [rows] = await pool.query(
+        "SELECT * FROM Produto WHERE nomeProduto = ? AND categoriaProduto = ? AND idProduto != ?",
+        [nomeProduto, categoriaProduto, idProduto]
+    );
 
     if (rows.length > 0) {
         return res.status(400).json({ error: "Produto já está cadastrado." });
@@ -96,7 +102,7 @@ export const updateProduct = async (req, res) => {
 
     await pool.query(
         "UPDATE Produto SET nomeProduto = ?, descricaoProduto = ?, categoriaProduto = ?, precoProduto = ? WHERE idProduto = ?",
-        [nomeProduto, descricaoProduto, categoriaProduto, precoProduto, idProduto]
+        [nomeProduto, descricaoProduto, categoriaProduto, precoProdutoNum, idProduto]
     );
 
     res.status(200).json({ message: "Produto atualizado com sucesso!" });
@@ -106,18 +112,24 @@ export const deleteProduct = async (req, res) => {
     const { idProduto } = req.params;
 
     try {
-        await pool.query("DELETE FROM Estoque WHERE fk_Produto_idProduto = ?", [idProduto]);
+        await pool.query(
+            "DELETE FROM Estoque WHERE fk_Produto_idProduto = ?",
+            [idProduto]
+        );
 
-        const [result] = await pool.query("DELETE FROM Produto WHERE idProduto = ?", [idProduto]);
+        const [result] = await pool.query(
+            "DELETE FROM Produto WHERE idProduto = ?",
+            [idProduto]
+        );
 
         if (result.affectedRows === 1) {
-            res.json({ message: "Produto deletado!" });
+            res.json({ message: "Produto deletado com sucesso. Vendas anteriores foram mantidas." });
         } else {
             res.status(404).json({ error: "Produto não encontrado." });
         }
 
     } catch (error) {
         console.error("Erro ao deletar produto:", error);
-        res.status(500).json({ error: "Erro ao deletar o produto." });
+        res.status(500).json({ error: "Erro ao deletar o produto. Verifique as dependências ou restrições." });
     }
 };
