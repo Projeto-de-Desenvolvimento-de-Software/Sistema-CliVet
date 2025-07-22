@@ -61,7 +61,6 @@ export const createSale = async (req, res) => {
   }
 };
 
-
 export const getSaleById = async (req, res) => {
     const { idVenda } = req.params;
 
@@ -130,15 +129,15 @@ export const searchSale = async (req, res) => {
       LEFT JOIN Produto p ON iv.fk_Produto_idProduto = p.idProduto
       WHERE COALESCE(c.nome, 'Cliente Removido') LIKE ?
         OR IFNULL(p.nomeProduto, 'Produto removido') LIKE ?
-        OR DATE(v.dataVenda) LIKE ?`,
-      [`%${pesquisa}%`, `%${pesquisa}%`, `%${pesquisa}%`]);
+        OR DATE_FORMAT(v.dataVenda, '%d/%m/%Y') LIKE ?
+        OR DATE_FORMAT(v.dataVenda, '%Y-%m-%d') LIKE ?
+    `, [`%${pesquisa}%`, `%${pesquisa}%`, `%${pesquisa}%`, `%${pesquisa}%`]);
 
     res.json(sales);
   } catch (error) {
     res.status(500).json({ error: "Erro ao pesquisar vendas." });
   }
 };
-
 
 export const updateSale = async (req, res) => {
   const { idVenda } = req.params;
@@ -281,7 +280,6 @@ export const updateSale = async (req, res) => {
     return res.status(500).json({ error: "Erro ao atualizar venda." });
   }
 };
-
 
 export const deleteSale = async (req, res) => {
   const { idVenda } = req.params;
