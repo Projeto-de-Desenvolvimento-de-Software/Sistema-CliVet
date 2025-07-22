@@ -4,9 +4,9 @@ import { pool } from "../services/db.js";
 export const createStock = async (req, res) => {
   const { quantidade, dataEntrada, validade, idProduto } = req.body;
 
-  const [produtos] = await pool.query("SELECT * FROM Produto WHERE idProduto = ? ", [idProduto]);
+  const [products] = await pool.query("SELECT * FROM Produto WHERE idProduto = ? ", [idProduto]);
 
-  if (produtos.length === 0) {
+  if (products.length === 0) {
     return res.status(404).json({ error: "Produto não encontrado para adicionar ao estoque." });
   }
 
@@ -46,7 +46,6 @@ export const getStockById = async (req, res) => {
 
         res.json(rows[0]);
     } catch (error) {
-        console.error("Erro ao buscar Estoque por ID:", error);
         res.status(500).json({ error: "Erro interno do servidor." });
     }
 };
@@ -74,7 +73,6 @@ export const renderStock = async (req, res) => {
 
     return res.status(200).json(formattedStock);
   } catch (error) {
-    console.error("Erro ao buscar o estoque:", error);
     return res.status(500).json({ error: "Erro ao buscar o estoque." });
   }
 };
@@ -83,7 +81,7 @@ export const searchStock = async (req, res) => {
   const { pesquisa = "" } = req.query;
 
   try {
-    const [estoque] = await pool.query(`
+    const [stock] = await pool.query(`
       SELECT 
         p.nomeProduto, p.descricaoProduto, p.categoriaProduto,
         e.quantidade, e.dataEntrada, e.validade, e.idEstoque
@@ -92,9 +90,8 @@ export const searchStock = async (req, res) => {
       WHERE p.nomeProduto LIKE ? OR p.categoriaProduto LIKE ?
     `, [`%${pesquisa}%`, `%${pesquisa}%`]);
 
-    res.json(estoque);
+    res.json(stock);
   } catch (error) {
-    console.error("Erro ao pesquisar estoque:", error);
     res.status(500).json({ error: "Erro ao pesquisar o estoque." });
   }
 };
@@ -131,7 +128,6 @@ export const updateStock = async (req, res) => {
         return res.status(200).json({ message: "Estoque atualizado com sucesso!" });
 
     } catch (error) {
-        console.error("Erro ao atualizar o estoque:", error);
         return res.status(500).json({ error: "Erro ao atualizar o estoque." });
     }
 };

@@ -26,7 +26,6 @@ export const getClientById = async (req, res) => {
 
         res.json(rows[0]);
     } catch (error) {
-        console.error("Erro ao buscar cliente por ID:", error);
         res.status(500).json({ error: "Erro interno do servidor." });
     }
 };
@@ -38,15 +37,15 @@ export const renderClients = async (req, res) => {
 
 export const searchClients = async (req, res) => {
     const { nome } = req.query;
-        const [cliente] = await pool.query(
+        const [client] = await pool.query(
             "SELECT * FROM Cliente WHERE nome LIKE ?", 
             [`%${nome}%`]
         );
 
-        if (cliente.length === 0) {
+        if (client.length === 0) {
             return res.status(404).json({ error: "Nenhum cliente encontrado."})
         }
-        res.json(cliente);
+        res.json(client);
 };
 
 export const updateClient = async (req, res) => {
@@ -89,7 +88,6 @@ export const deleteClient = async (req, res) => {
       res.status(404).json({ error: "Cliente não encontrado." });
     }
   } catch (error) {
-    console.error("Erro ao deletar cliente:", error);
     res.status(500).json({ error: "Erro interno do servidor." });
   }
 };

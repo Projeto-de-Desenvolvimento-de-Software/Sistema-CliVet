@@ -57,7 +57,6 @@ export const createSale = async (req, res) => {
       venda: { idVenda, dataVenda, idCliente, idProduto, precoUnitario, quantidadeVendida, valorTotal }
     });
   } catch (error) {
-    console.error("Erro ao criar venda:", error);
     return res.status(500).json({ error: "Erro interno do servidor." });
   }
 };
@@ -70,7 +69,7 @@ export const getSaleById = async (req, res) => {
         const [rows] = await pool.query(`
             SELECT 
             v.idVenda, v.dataVenda, v.valorTotal,
-            c.idCliente, COALESCE(c.nome, 'Cliente Removido') AS nome, c.email,
+            c.idCliente, COALESCE(c.nome, 'Cliente Removido') AS nome,
             p.idProduto, p.nomeProduto, p.categoriaProduto, 
             iv.precoUnitario, iv.quantidade
           FROM Venda v
@@ -86,7 +85,6 @@ export const getSaleById = async (req, res) => {
 
         res.json(rows[0]);
     } catch (error) {
-        console.error("Erro ao buscar venda por ID:", error);
         res.status(500).json({ error: "Erro interno do servidor." });
     }
 };
@@ -96,7 +94,7 @@ export const renderSale = async (req, res) => {
     const [sales] = await pool.query(`
      SELECT 
         v.idVenda, v.dataVenda, v.valorTotal,
-        c.idCliente, COALESCE(c.nome, 'Cliente Removido') AS nome, c.email,
+        c.idCliente, COALESCE(c.nome, 'Cliente Removido') AS nome, 
         COALESCE(p.idProduto, NULL) AS idProduto,
         COALESCE(p.nomeProduto, 'Produto removido') AS nomeProduto,
         iv.precoUnitario, iv.quantidade
@@ -112,7 +110,6 @@ export const renderSale = async (req, res) => {
 
     return res.status(200).json(sales);
   } catch (error) {
-    console.error("Erro ao buscar as vendas:", error);
     return res.status(500).json({ error: "Erro ao buscar as vendas." });
   }
 };
@@ -124,7 +121,7 @@ export const searchSale = async (req, res) => {
     const [sales] = await pool.query(`
       SELECT 
         v.idVenda, v.dataVenda, v.valorTotal,
-        c.idCliente, COALESCE(c.nome, 'Cliente Removido') AS nome, c.email,
+        c.idCliente, COALESCE(c.nome, 'Cliente Removido') AS nome, 
         p.idProduto, IFNULL(p.nomeProduto, 'Produto removido') AS nomeProduto,
         iv.precoUnitario, iv.quantidade
       FROM Venda v
@@ -138,7 +135,6 @@ export const searchSale = async (req, res) => {
 
     res.json(sales);
   } catch (error) {
-    console.error("Erro ao pesquisar vendas:", error);
     res.status(500).json({ error: "Erro ao pesquisar vendas." });
   }
 };
@@ -282,7 +278,6 @@ export const updateSale = async (req, res) => {
     return res.status(200).json({ message: "Venda atualizada com sucesso!" });
 
   } catch (error) {
-    console.error("Erro ao atualizar venda:", error);
     return res.status(500).json({ error: "Erro ao atualizar venda." });
   }
 };
@@ -317,9 +312,7 @@ export const deleteSale = async (req, res) => {
           "UPDATE Estoque SET quantidade = ? WHERE fk_Produto_idProduto = ?",
           [updatedStockQty, idProduto]
         );
-      } else {
-        console.warn(`Produto ${idProduto} não encontrado no estoque, não foi possível devolver quantidade.`);
-      }
+      } 
     }
 
     await pool.query("DELETE FROM Itens_Venda WHERE fk_Venda_idVenda = ?", [idVenda]);
@@ -333,7 +326,6 @@ export const deleteSale = async (req, res) => {
     }
 
   } catch (error) {
-    console.error("Erro ao deletar venda:", error);
     res.status(500).json({ error: "Erro interno do servidor." });
   }
 };

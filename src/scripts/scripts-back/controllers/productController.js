@@ -28,7 +28,6 @@ export const getProductById = async (req, res) => {
 
         res.json(rows[0]);
     } catch (error) {
-        console.error("Erro ao buscar Produto por ID:", error);
         res.status(500).json({ error: "Erro interno do servidor." });
     }
 };
@@ -48,7 +47,6 @@ export const getProductsByCategory = async (req, res) => {
 
     res.json(rows);
   } catch (error) {
-    console.error("Erro ao buscar produtos por categoria:", error);
     res.status(500).json({ error: "Erro interno do servidor." });
   }
 };
@@ -60,15 +58,15 @@ export const renderProducts = async (req, res) => {
 
 export const searchProducts = async (req, res) => {
     const { nomeProduto } = req.query;
-        const [produto] = await pool.query(
+        const [product] = await pool.query(
             "SELECT * FROM Produto WHERE nomeProduto LIKE ?", 
             [`%${nomeProduto}%`]
         );
 
-        if (produto.length === 0) {
+        if (product.length === 0) {
             return res.status(404).json({ error: "Nenhum Produto encontrado."})
         }
-        res.json(produto);
+        res.json(product);
 };
 
 export const updateProduct = async (req, res) => {
@@ -129,7 +127,6 @@ export const deleteProduct = async (req, res) => {
         }
 
     } catch (error) {
-        console.error("Erro ao deletar produto:", error);
         res.status(500).json({ error: "Erro ao deletar o produto. Verifique as dependências ou restrições." });
     }
 };
